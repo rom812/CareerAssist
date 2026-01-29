@@ -159,7 +159,7 @@ async def invoke_extractor(
     Returns:
         Confirmation and extracted profile summary
     """
-    ctx = wrapper.context
+    context = wrapper.context
     logger.info(f"Orchestrator: Invoking Extractor for {extraction_type}")
     
     result = invoke_lambda_agent(
@@ -168,9 +168,9 @@ async def invoke_extractor(
         {
             "type": extraction_type,
             "text": text,
-            "job_id": ctx.job_id
+            "job_id": context.job_id
         },
-        trace_context=ctx.trace_context
+        trace_context=context.trace_context
     )
     
     if result.get("success"):
@@ -178,31 +178,31 @@ async def invoke_extractor(
         
         # Store extracted profile in context for subsequent agent calls
         if extraction_type == "cv":
-            ctx.input_data["cv_profile"] = profile
+            context.input_data["cv_profile"] = profile
             logger.info(f"Orchestrator: Stored cv_profile in context")
             
             # Save to jobs table
-            if ctx.db:
+            if context.db:
                 try:
-                    ctx.db.client.update('jobs', {'extractor_payload': {'cv_profile': profile}}, "id = :id::uuid", {'id': ctx.job_id})
+                    context.db.client.update('jobs', {'extractor_payload': {'cv_profile': profile}}, "id = :id::uuid", {'id': context.job_id})
                 except Exception as e:
                     logger.warning(f"Could not save extractor results: {e}")
             
             return f"CV extracted: {profile.get('name', 'Unknown')} with {len(profile.get('skills', []))} skills"
         else:
-            ctx.input_data["job_profile"] = profile
+            context.input_data["job_profile"] = profile
             logger.info(f"Orchestrator: Stored job_profile in context")
             
             # Save to jobs table
-            if ctx.db:
+            if context.db:
                 try:
-                    existing = ctx.db.client.query_one("SELECT extractor_payload FROM jobs WHERE id = :id::uuid", [{'name': 'id', 'value': {'stringValue': ctx.job_id}}])
+                    existing = context.db.client.query_one("SELECT extractor_payload FROM jobs WHERE id = :id::uuid", [{'name': 'id', 'value': {'stringValue': context.job_id}}])
                     extractor_payload = existing.get('extractor_payload', {}) if existing else {}
                     if isinstance(extractor_payload, str):
                         import json
                         extractor_payload = json.loads(extractor_payload)
                     extractor_payload['job_profile'] = profile
-                    ctx.db.client.update('jobs', {'extractor_payload': extractor_payload}, "id = :id::uuid", {'id': ctx.job_id})
+                    context.db.client.update('jobs', {'extractor_payload': extractor_payload}, "id = :id::uuid", {'id': context.job_id})
                 except Exception as e:
                     logger.warning(f"Could not save extractor results: {e}")
             
@@ -224,7 +224,7 @@ async def invoke_analyzer(
     Returns:
         Confirmation and analysis summary
     """
-    ctx = wrapper.context
+    context = wrapper.context
     logger.info(f"Orchestrator: Invoking Analyzer for {analysis_type}")
     
     result = invoke_lambda_agent(
@@ -232,19 +232,19 @@ async def invoke_analyzer(
         ANALYZER_FUNCTION, 
         {
             "type": analysis_type,
-            "job_id": ctx.job_id,
-            "cv_profile": ctx.input_data.get("cv_profile"),
-            "job_profile": ctx.input_data.get("job_profile"),
-            "gap_analysis": ctx.input_data.get("gap_analysis")
+            "job_id": context.job_id,
+            "cv_profile": context.input_data.get("cv_profile"),
+            "job_profile": context.input_data.get("job_profile"),
+            "gap_analysis": context.input_data.get("gap_analysis")
         },
-        trace_context=ctx.trace_context
+        trace_context=context.trace_context
     )
     
     if result.get("success"):
         # Store gap_analysis in context for subsequent agent calls (e.g., Interviewer)
         gap = result.get("gap_analysis", {})
         if gap:
-            ctx.input_data["gap_analysis"] = gap
+            context.input_data["gap_analysis"] = gap
             logger.info(f"Orchestrator: Stored gap_analysis in context (fit_score={gap.get('fit_score')})")
         
         # Check cv_rewrite status
@@ -259,7 +259,7 @@ async def invoke_analyzer(
             logger.warning(f"Orchestrator: CV rewrite is missing (no data and no error)")
         
         # Save results to jobs table
-        if ctx.db:
+        if context.db:
             try:
                 update_data = {'analyzer_payload': result}
                 if cv_rewrite:
@@ -268,12 +268,12 @@ async def invoke_analyzer(
                 logger.info(f"Orchestrator: Attempting to save analyzer results: {list(update_data.keys())}")
                 logger.info(f"Orchestrator: analyzer_payload keys: {list(result.keys()) if result else 'None'}")
                 
-                rows_updated = ctx.db.client.update('jobs', update_data, "id = :id::uuid", {'id': ctx.job_id})
+                rows_updated = context.db.client.update('jobs', update_data, "id = :id::uuid", {'id': context.job_id})
                 
                 if rows_updated > 0:
-                    logger.info(f"Orchestrator: Saved analyzer results to job {ctx.job_id} (rows={rows_updated}, cv_rewrite={'present' if cv_rewrite else 'missing'})")
+                    logger.info(f"Orchestrator: Saved analyzer results to job {context.job_id} (rows={rows_updated}, cv_rewrite={'present' if cv_rewrite else 'missing'})")
                 else:
-                    logger.error(f"Orchestrator: Failed to save analyzer results - 0 rows updated for job {ctx.job_id}")
+                    logger.error(f"Orchestrator: Failed to save analyzer results - 0 rows updated for job {context.job_id}")
             except Exception as e:
                 logger.error(f"Orchestrator: Error saving analyzer results: {e}", exc_info=True)
         
@@ -299,7 +299,7 @@ async def invoke_interviewer(wrapper: RunContextWrapper[OrchestratorContext]) ->
     Returns:
         Confirmation and interview prep summary
     """
-    ctx = wrapper.context
+    context = wrapper.context
     logger.info("Orchestrator: Invoking Interviewer")
     
     result = invoke_lambda_agent(
@@ -307,17 +307,17 @@ async def invoke_interviewer(wrapper: RunContextWrapper[OrchestratorContext]) ->
         INTERVIEWER_FUNCTION, 
         {
             "type": "interview_prep",
-            "job_id": ctx.job_id,
-            "job_profile": ctx.input_data.get("job_profile"),
-            "cv_profile": ctx.input_data.get("cv_profile"),
-            "gap_analysis": ctx.input_data.get("gap_analysis")
+            "job_id": context.job_id,
+            "job_profile": context.input_data.get("job_profile"),
+            "cv_profile": context.input_data.get("cv_profile"),
+            "gap_analysis": context.input_data.get("gap_analysis")
         },
-        trace_context=ctx.trace_context
+        trace_context=context.trace_context
     )
     
     if result.get("success"):
         # Save results to jobs table
-        if ctx.db:
+        if context.db:
             try:
                 pack = result.get("interview_pack", {})
                 # Only save to interviewer_payload - interview_payload column doesn't exist
@@ -328,12 +328,12 @@ async def invoke_interviewer(wrapper: RunContextWrapper[OrchestratorContext]) ->
                 logger.info(f"Orchestrator: Attempting to save interviewer results")
                 logger.info(f"Orchestrator: interviewer_payload keys: {list(result.keys()) if result else 'None'}")
                 
-                rows_updated = ctx.db.client.update('jobs', update_data, "id = :id::uuid", {'id': ctx.job_id})
+                rows_updated = context.db.client.update('jobs', update_data, "id = :id::uuid", {'id': context.job_id})
                 
                 if rows_updated > 0:
-                    logger.info(f"Orchestrator: Saved interviewer results to job {ctx.job_id} (rows={rows_updated}, questions={len(pack.get('questions', []))})")
+                    logger.info(f"Orchestrator: Saved interviewer results to job {context.job_id} (rows={rows_updated}, questions={len(pack.get('questions', []))})")
                 else:
-                    logger.error(f"Orchestrator: Failed to save interviewer results - 0 rows updated for job {ctx.job_id}")
+                    logger.error(f"Orchestrator: Failed to save interviewer results - 0 rows updated for job {context.job_id}")
             except Exception as e:
                 logger.error(f"Orchestrator: Error saving interviewer results: {e}", exc_info=True)
         
@@ -350,18 +350,18 @@ async def invoke_charter(wrapper: RunContextWrapper[OrchestratorContext]) -> str
     Returns:
         Confirmation and analytics summary
     """
-    ctx = wrapper.context
+    context = wrapper.context
     logger.info("Orchestrator: Invoking Charter")
     
     result = invoke_lambda_agent(
         "Charter", 
         CHARTER_FUNCTION, 
         {
-            "job_id": ctx.job_id,
-            "applications_data": ctx.input_data.get("applications_data"),
-            "user_id": ctx.input_data.get("user_id")
+            "job_id": context.job_id,
+            "applications_data": context.input_data.get("applications_data"),
+            "user_id": context.input_data.get("user_id")
         },
-        trace_context=ctx.trace_context
+        trace_context=context.trace_context
     )
     
     if result.get("success"):

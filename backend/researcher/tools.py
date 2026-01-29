@@ -25,17 +25,17 @@ AWS_REGION = os.getenv("DEFAULT_AWS_REGION", "us-east-1")
 VALID_CATEGORIES = ["role_trend", "skill_demand", "salary_insight", "industry_news"]
 
 
-def _get_rds_client():
+def _get_rds_data_api_client():
     """Get RDS Data API client."""
     return boto3.client('rds-data', region_name=AWS_REGION)
 
 
-def _execute_sql(sql: str, params: Dict[str, Any] = None) -> Dict:
+def _execute_rds_statement(sql: str, params: Dict[str, Any] = None) -> Dict:
     """Execute SQL via RDS Data API."""
     if not AURORA_CLUSTER_ARN or not AURORA_SECRET_ARN:
         raise ValueError("Aurora database not configured")
     
-    rds = _get_rds_client()
+    rds_client = _get_rds_data_api_client()
     sql_params = []
     
     if params:
@@ -55,7 +55,7 @@ def _execute_sql(sql: str, params: Dict[str, Any] = None) -> Dict:
                 param["value"] = {"stringValue": str(value)}
             sql_params.append(param)
     
-    return rds.execute_statement(
+    return rds_client.execute_statement(
         resourceArn=AURORA_CLUSTER_ARN,
         secretArn=AURORA_SECRET_ARN,
         database=DATABASE_NAME,
@@ -64,7 +64,7 @@ def _execute_sql(sql: str, params: Dict[str, Any] = None) -> Dict:
     )
 
 
-def _ingest(document: Dict[str, Any]) -> Dict[str, Any]:
+def _ingest_via_api(document: Dict[str, Any]) -> Dict[str, Any]:
     """Internal function to make the actual API call."""
     with httpx.Client() as client:
         response = client.post(
@@ -83,7 +83,7 @@ def _ingest(document: Dict[str, Any]) -> Dict[str, Any]:
 )
 def ingest_with_retries(document: Dict[str, Any]) -> Dict[str, Any]:
     """Ingest with retry logic for SageMaker cold starts."""
-    return _ingest(document)
+    return _ingest_via_api(document)
 
 
 @function_tool
@@ -188,7 +188,7 @@ def store_discovered_job(
     
     try:
         # Use UPSERT to avoid duplicates based on source + source_job_id
-        _execute_sql(
+        _execute_rds_statement(
             """INSERT INTO discovered_jobs 
                (id, source, source_url, source_job_id, company_name, role_title, 
                 location, remote_policy, salary_min, salary_max, 
@@ -300,7 +300,7 @@ def store_research_finding(
             metadata_dict = metadata or {}
         
         # Insert into database
-        _execute_sql(
+        _execute_rds_statement(
             """INSERT INTO research_findings 
                (id, topic, category, title, summary, content, source_url, relevance_score, is_featured, metadata)
                VALUES (:id::uuid, :topic, :category, :title, :summary, :content, :source_url, :relevance_score, :is_featured, :metadata::jsonb)""",

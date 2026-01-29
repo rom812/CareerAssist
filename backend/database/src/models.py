@@ -62,12 +62,12 @@ class UserProfiles(BaseModel):
     
     def create_user(self, profile: UserProfileCreate) -> str:
         """Create a new user profile"""
-        data = profile.model_dump(exclude_none=True)
-        return self.db.insert(self.table_name, data, returning='id')
+        profile_data = profile.model_dump(exclude_none=True)
+        return self.db.insert(self.table_name, profile_data, returning='id')
     
-    def update_profile(self, user_id: str, data: Dict) -> int:
+    def update_profile(self, user_id: str, profile_updates: Dict) -> int:
         """Update user profile by ID"""
-        return self.db.update(self.table_name, data, "id = :id::uuid", {'id': str(user_id)})
+        return self.db.update(self.table_name, profile_updates, "id = :id::uuid", {'id': str(user_id)})
     
     def get_or_create(self, clerk_user_id: str, full_name: str = None, email: str = None) -> Dict:
         """Get existing user or create new one"""
@@ -109,33 +109,33 @@ class CVVersions(BaseModel):
     
     def create_cv_version(self, user_id: str, cv: CVVersionCreate) -> str:
         """Create a new CV version"""
-        data = cv.model_dump(exclude_none=True)
-        data['user_id'] = user_id
+        cv_data = cv.model_dump(exclude_none=True)
+        cv_data['user_id'] = user_id
         
         # If this is set as primary, unset other primaries first
-        if data.get('is_primary'):
+        if cv_data.get('is_primary'):
             self.unset_all_primary(user_id)
         
-        return self.db.insert(self.table_name, data, returning='id')
+        return self.db.insert(self.table_name, cv_data, returning='id')
     
     def update_parsed(self, cv_id: str, parsed_json: Dict) -> int:
         """Update CV with parsed data"""
-        data = {'parsed_json': parsed_json}
-        return self.db.update(self.table_name, data, "id = :id::uuid", {'id': str(cv_id)})
+        parsed_data = {'parsed_json': parsed_json}
+        return self.db.update(self.table_name, parsed_data, "id = :id::uuid", {'id': str(cv_id)})
     
     def set_primary(self, cv_id: str, user_id: str) -> int:
         """Set a CV version as primary"""
         # First unset all primaries for this user
         self.unset_all_primary(user_id)
         # Then set this one as primary
-        data = {'is_primary': True}
-        return self.db.update(self.table_name, data, "id = :id::uuid", {'id': str(cv_id)})
+        primary_update = {'is_primary': True}
+        return self.db.update(self.table_name, primary_update, "id = :id::uuid", {'id': str(cv_id)})
     
     def unset_all_primary(self, user_id: str) -> int:
         """Unset primary flag for all user's CVs"""
-        data = {'is_primary': False}
+        primary_update = {'is_primary': False}
         return self.db.update(
-            self.table_name, data, 
+            self.table_name, primary_update, 
             "user_id = :user_id::uuid AND is_primary = true", 
             {'user_id': str(user_id)}
         )
@@ -164,14 +164,14 @@ class JobPostings(BaseModel):
     
     def create_job_posting(self, user_id: str, job: JobPostingCreate) -> str:
         """Create a new job posting"""
-        data = job.model_dump(exclude_none=True)
-        data['user_id'] = user_id
-        return self.db.insert(self.table_name, data, returning='id')
+        job_data = job.model_dump(exclude_none=True)
+        job_data['user_id'] = user_id
+        return self.db.insert(self.table_name, job_data, returning='id')
     
     def update_parsed(self, job_id: str, parsed_json: Dict) -> int:
         """Update job posting with parsed data"""
-        data = {'parsed_json': parsed_json}
-        return self.db.update(self.table_name, data, "id = :id::uuid", {'id': str(job_id)})
+        parsed_data = {'parsed_json': parsed_json}
+        return self.db.update(self.table_name, parsed_data, "id = :id::uuid", {'id': str(job_id)})
     
     def search_by_company(self, user_id: str, company_name: str) -> List[Dict]:
         """Search job postings by company name"""
@@ -189,8 +189,8 @@ class JobPostings(BaseModel):
     
     def toggle_saved(self, job_id: str, is_saved: bool) -> int:
         """Toggle saved status of a job posting"""
-        data = {'is_saved': is_saved}
-        return self.db.update(self.table_name, data, "id = :id::uuid", {'id': str(job_id)})
+        saved_update = {'is_saved': is_saved}
+        return self.db.update(self.table_name, saved_update, "id = :id::uuid", {'id': str(job_id)})
 
 
 class GapAnalyses(BaseModel):
@@ -233,7 +233,7 @@ class GapAnalyses(BaseModel):
         gaps: List[Dict], action_items: List[str]
     ) -> str:
         """Create a new gap analysis"""
-        data = {
+        analysis_data = {
             'job_id': job_id,
             'cv_version_id': cv_version_id,
             'fit_score': fit_score,
@@ -243,7 +243,7 @@ class GapAnalyses(BaseModel):
             'gaps': gaps,
             'action_items': action_items
         }
-        return self.db.insert(self.table_name, data, returning='id')
+        return self.db.insert(self.table_name, analysis_data, returning='id')
 
 
 class CVRewrites(BaseModel):
@@ -266,7 +266,7 @@ class CVRewrites(BaseModel):
         cover_letter: str = None, linkedin_summary: str = None
     ) -> str:
         """Create a CV rewrite"""
-        data = {
+        rewrite_data = {
             'gap_analysis_id': gap_analysis_id,
             'rewritten_summary': rewritten_summary,
             'rewritten_bullets': rewritten_bullets,
@@ -274,7 +274,7 @@ class CVRewrites(BaseModel):
             'cover_letter': cover_letter,
             'linkedin_summary': linkedin_summary
         }
-        return self.db.insert(self.table_name, data, returning='id')
+        return self.db.insert(self.table_name, rewrite_data, returning='id')
 
 
 class JobApplications(BaseModel):
@@ -327,22 +327,22 @@ class JobApplications(BaseModel):
     
     def update_status(self, app_id: str, status: str, notes: str = None) -> int:
         """Update application status"""
-        data = {
+        status_update = {
             'status': status,
             'last_status_change': datetime.utcnow()
         }
         if notes:
-            data['notes'] = notes
+            status_update['notes'] = notes
         if status == 'applied':
-            data['applied_at'] = datetime.utcnow()
-        return self.db.update(self.table_name, data, "id = :id::uuid", {'id': str(app_id)})
+            status_update['applied_at'] = datetime.utcnow()
+        return self.db.update(self.table_name, status_update, "id = :id::uuid", {'id': str(app_id)})
     
     def update_application(self, app_id: str, update: JobApplicationUpdate) -> int:
         """Update job application with new data"""
-        data = update.model_dump(exclude_none=True)
-        if data.get('status'):
-            data['last_status_change'] = datetime.utcnow()
-        return self.db.update(self.table_name, data, "id = :id::uuid", {'id': str(app_id)})
+        application_updates = update.model_dump(exclude_none=True)
+        if application_updates.get('status'):
+            application_updates['last_status_change'] = datetime.utcnow()
+        return self.db.update(self.table_name, application_updates, "id = :id::uuid", {'id': str(app_id)})
 
 
 class InterviewSessions(BaseModel):
@@ -383,8 +383,8 @@ class InterviewSessions(BaseModel):
     
     def update_questions(self, session_id: str, questions: List[Dict]) -> int:
         """Update session with questions"""
-        data = {'questions': questions}
-        return self.db.update(self.table_name, data, "id = :id::uuid", {'id': str(session_id)})
+        questions_update = {'questions': questions}
+        return self.db.update(self.table_name, questions_update, "id = :id::uuid", {'id': str(session_id)})
     
     def save_answer(self, session_id: str, question_id: str, answer: str) -> int:
         """Save an answer to a question"""
@@ -408,8 +408,8 @@ class InterviewSessions(BaseModel):
                 'answered_at': datetime.utcnow().isoformat()
             })
         
-        data = {'answers': answers}
-        return self.db.update(self.table_name, data, "id = :id::uuid", {'id': str(session_id)})
+        answers_update = {'answers': answers}
+        return self.db.update(self.table_name, answers_update, "id = :id::uuid", {'id': str(session_id)})
     
     def save_evaluation(self, session_id: str, question_id: str, evaluation: Dict) -> int:
         """Save an evaluation for a question"""
@@ -419,17 +419,17 @@ class InterviewSessions(BaseModel):
         evaluation['question_id'] = question_id
         evaluations.append(evaluation)
         
-        data = {'evaluations': evaluations}
-        return self.db.update(self.table_name, data, "id = :id::uuid", {'id': str(session_id)})
+        evaluations_update = {'evaluations': evaluations}
+        return self.db.update(self.table_name, evaluations_update, "id = :id::uuid", {'id': str(session_id)})
     
     def complete_session(self, session_id: str, overall_score: int, duration_minutes: int) -> int:
         """Mark session as complete"""
-        data = {
+        completion_data = {
             'overall_score': overall_score,
             'duration_minutes': duration_minutes,
             'completed_at': datetime.utcnow()
         }
-        return self.db.update(self.table_name, data, "id = :id::uuid", {'id': str(session_id)})
+        return self.db.update(self.table_name, completion_data, "id = :id::uuid", {'id': str(session_id)})
 
 
 class Jobs(BaseModel):
@@ -438,56 +438,56 @@ class Jobs(BaseModel):
     
     def create_job(self, user_id: str, job_type: str, input_data: Dict = None) -> str:
         """Create a new async job"""
-        data = {
+        job_data = {
             'user_id': user_id,
             'job_type': job_type,
             'status': 'pending',
             'input_data': input_data,
             'progress_percentage': 0
         }
-        return self.db.insert(self.table_name, data, returning='id')
+        return self.db.insert(self.table_name, job_data, returning='id')
     
     def update_status(self, job_id: str, status: str, error_message: str = None, progress: int = None) -> int:
         """Update job status"""
-        data = {'status': status}
+        status_update = {'status': status}
         
         if status == 'processing':
-            data['started_at'] = datetime.utcnow()
+            status_update['started_at'] = datetime.utcnow()
         elif status in ['completed', 'failed']:
-            data['completed_at'] = datetime.utcnow()
+            status_update['completed_at'] = datetime.utcnow()
         
         if error_message:
-            data['error_message'] = error_message
+            status_update['error_message'] = error_message
         
         if progress is not None:
-            data['progress_percentage'] = progress
+            status_update['progress_percentage'] = progress
         
-        return self.db.update(self.table_name, data, "id = :id::uuid", {'id': str(job_id)})
+        return self.db.update(self.table_name, status_update, "id = :id::uuid", {'id': str(job_id)})
     
     def update_extractor(self, job_id: str, extractor_payload: Dict) -> int:
         """Update job with Extractor agent's parsed data"""
-        data = {'extractor_payload': extractor_payload}
-        return self.db.update(self.table_name, data, "id = :id::uuid", {'id': str(job_id)})
+        extractor_update = {'extractor_payload': extractor_payload}
+        return self.db.update(self.table_name, extractor_update, "id = :id::uuid", {'id': str(job_id)})
     
     def update_analyzer(self, job_id: str, analyzer_payload: Dict) -> int:
         """Update job with Analyzer agent's gap analysis"""
-        data = {'analyzer_payload': analyzer_payload}
-        return self.db.update(self.table_name, data, "id = :id::uuid", {'id': str(job_id)})
+        analyzer_update = {'analyzer_payload': analyzer_payload}
+        return self.db.update(self.table_name, analyzer_update, "id = :id::uuid", {'id': str(job_id)})
     
     def update_interviewer(self, job_id: str, interviewer_payload: Dict) -> int:
         """Update job with Interviewer agent's interview prep"""
-        data = {'interviewer_payload': interviewer_payload}
-        return self.db.update(self.table_name, data, "id = :id::uuid", {'id': str(job_id)})
+        interviewer_update = {'interviewer_payload': interviewer_payload}
+        return self.db.update(self.table_name, interviewer_update, "id = :id::uuid", {'id': str(job_id)})
     
     def update_charter(self, job_id: str, charter_payload: Dict) -> int:
         """Update job with Charter agent's analytics"""
-        data = {'charter_payload': charter_payload}
-        return self.db.update(self.table_name, data, "id = :id::uuid", {'id': str(job_id)})
+        charter_update = {'charter_payload': charter_payload}
+        return self.db.update(self.table_name, charter_update, "id = :id::uuid", {'id': str(job_id)})
     
     def update_summary(self, job_id: str, summary_payload: Dict) -> int:
         """Update job with Orchestrator's final summary"""
-        data = {'summary_payload': summary_payload}
-        return self.db.update(self.table_name, data, "id = :id::uuid", {'id': str(job_id)})
+        summary_update = {'summary_payload': summary_payload}
+        return self.db.update(self.table_name, summary_update, "id = :id::uuid", {'id': str(job_id)})
     
     def find_by_user(self, user_id: str, status: str = None, job_type: str = None, limit: int = 20) -> List[Dict]:
         """Find jobs for a user"""
