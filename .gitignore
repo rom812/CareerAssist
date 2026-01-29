@@ -306,6 +306,13 @@ node_modules_old_*/
 # If you need specific .md files (like README.md), add exceptions below
 *.md
 
+# But allow specific important markdown files
+!README.md
+!.github/*.md
+!docs/*.md
+!terraform/README.md
+!gameplan.md
+
 # Temporary log and status files
 commit_log.txt
 git_branch.txt

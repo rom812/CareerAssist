@@ -472,6 +472,28 @@ This project showcases proficiency in:
 - Logging and observability
 - Security best practices (IAM, encryption, VPC)
 - Documentation and ADRs
+- Clean git history with squash merge strategy
+
+---
+
+## 🔀 Contributing & Git Workflow
+
+### Pull Request Guidelines
+
+To maintain a clean and readable git history, this repository uses **squash merge** for pull requests:
+
+1. Create a feature branch for your changes
+2. Make commits as needed during development
+3. Open a pull request when ready
+4. Use **"Squash and Merge"** when merging to main
+
+**Why Squash Merge?**
+- Keeps main branch history clean and linear
+- Combines all PR commits into a single logical commit
+- Prevents "work in progress" commits from cluttering history
+- Makes it easier to revert changes if needed
+
+See [`.github/MERGE_STRATEGY.md`](.github/MERGE_STRATEGY.md) for detailed merge strategy guidelines and [`.github/REPOSITORY_SETTINGS.md`](.github/REPOSITORY_SETTINGS.md) for repository configuration instructions.
 
 ---
 
