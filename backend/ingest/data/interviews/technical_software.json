@@ -1,0 +1,55 @@
+{
+    "type": "interview_question",
+    "category": "technical_software_engineer",
+    "questions": [
+        {
+            "topic": "system_design",
+            "question": "Design a URL shortening service like bit.ly",
+            "what_theyre_testing": "System design fundamentals, scalability thinking, trade-off analysis, communication skills",
+            "good_answer_structure": "Start with clarifying requirements (reads vs writes, scale), design high-level components, discuss data model, address scalability (sharding, caching), and consider edge cases.",
+            "key_concepts": [
+                "Hash functions",
+                "Database sharding",
+                "Caching",
+                "Load balancing",
+                "Analytics"
+            ]
+        },
+        {
+            "topic": "coding",
+            "question": "Implement an LRU (Least Recently Used) cache",
+            "what_theyre_testing": "Data structures knowledge, algorithm design, code quality, optimization thinking",
+            "good_answer_structure": "Use a hash map + doubly linked list for O(1) get and put. Explain the approach before coding, handle edge cases, and discuss space/time complexity.",
+            "key_concepts": [
+                "Hash maps",
+                "Linked lists",
+                "Time complexity",
+                "Space complexity"
+            ]
+        },
+        {
+            "topic": "architecture",
+            "question": "How would you design an API rate limiter?",
+            "what_theyre_testing": "Distributed systems knowledge, algorithm design, understanding of production concerns",
+            "good_answer_structure": "Discuss token bucket or sliding window algorithms, distributed vs local limiting, storage (Redis), handling edge cases like time synchronization.",
+            "key_concepts": [
+                "Token bucket",
+                "Sliding window",
+                "Redis",
+                "Distributed systems"
+            ]
+        },
+        {
+            "topic": "debugging",
+            "question": "A service is responding slowly. How would you diagnose and fix it?",
+            "what_theyre_testing": "Debugging approach, production experience, systematic thinking",
+            "good_answer_structure": "Check metrics (latency, CPU, memory), look at logs, trace requests, identify bottlenecks (DB, network, code), propose targeted fixes.",
+            "key_concepts": [
+                "Observability",
+                "Profiling",
+                "Tracing",
+                "Metrics"
+            ]
+        }
+    ]
+}

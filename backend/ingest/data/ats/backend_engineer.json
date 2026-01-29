@@ -1,0 +1,48 @@
+{
+    "type": "ats_keyword_guide",
+    "industry": "tech",
+    "role": "backend_engineer",
+    "description": "Keywords commonly scanned by ATS systems for backend engineering roles",
+    "must_have_keywords": [
+        "Python",
+        "Java",
+        "Go",
+        "Node.js",
+        "REST API",
+        "GraphQL",
+        "SQL",
+        "PostgreSQL",
+        "MySQL",
+        "AWS",
+        "GCP",
+        "Azure",
+        "Docker",
+        "Kubernetes",
+        "CI/CD",
+        "GitHub Actions",
+        "Jenkins"
+    ],
+    "nice_to_have_keywords": [
+        "Microservices",
+        "Redis",
+        "Kafka",
+        "RabbitMQ",
+        "Terraform",
+        "Infrastructure as Code",
+        "gRPC",
+        "Protocol Buffers",
+        "Elasticsearch",
+        "MongoDB",
+        "DynamoDB",
+        "Performance optimization",
+        "Scalability",
+        "Data pipelines",
+        "ETL"
+    ],
+    "tips": [
+        "Match the exact keywords from the job posting when possible",
+        "Use both acronyms and full terms (CI/CD and Continuous Integration)",
+        "Include technologies at your actual skill level",
+        "Quantify experience where possible (e.g., '5 years of Python development')"
+    ]
+}

@@ -1,0 +1,21 @@
+[project]
+name = "api"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "career-database",
+    "boto3>=1.40.29",
+    "fastapi>=0.116.1",
+    "fastapi-clerk-auth>=0.0.7",
+    "httpx>=0.28.1",
+    "mangum>=0.19.0",
+    "pdfplumber>=0.11.0",
+    "pydantic>=2.11.7",
+    "python-dotenv>=1.1.1",
+    "python-jose>=3.5.0",
+    "python-multipart>=0.0.9",
+    "uvicorn>=0.35.0",
+]
+
+[tool.uv.sources]
+career-database = { workspace = true }

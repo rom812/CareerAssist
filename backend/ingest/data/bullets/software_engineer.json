@@ -1,0 +1,36 @@
+{
+    "type": "cv_bullet_template",
+    "role_category": "software_engineer",
+    "bullets": [
+        {
+            "text": "Reduced API latency by 40% through Redis caching implementation, resulting in improved user experience for 2M+ daily active users",
+            "skill_area": "backend_performance",
+            "impact_type": "quantifiable"
+        },
+        {
+            "text": "Led migration of monolithic application to microservices architecture, improving deployment frequency by 300% and reducing incident resolution time by 60%",
+            "skill_area": "architecture",
+            "impact_type": "quantifiable"
+        },
+        {
+            "text": "Built real-time data pipeline processing 1M+ events/day using Kafka and Spark, enabling predictive analytics features",
+            "skill_area": "data_engineering",
+            "impact_type": "quantifiable"
+        },
+        {
+            "text": "Designed and implemented RESTful APIs serving 10K+ requests/second with 99.9% uptime SLA",
+            "skill_area": "api_development",
+            "impact_type": "quantifiable"
+        },
+        {
+            "text": "Mentored team of 5 junior developers, establishing code review practices that reduced production bugs by 45%",
+            "skill_area": "leadership",
+            "impact_type": "quantifiable"
+        },
+        {
+            "text": "Implemented comprehensive CI/CD pipeline using GitHub Actions and Terraform, reducing deployment time from 2 hours to 15 minutes",
+            "skill_area": "devops",
+            "impact_type": "quantifiable"
+        }
+    ]
+}

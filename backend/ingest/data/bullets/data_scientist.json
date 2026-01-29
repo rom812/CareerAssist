@@ -1,0 +1,31 @@
+{
+    "type": "cv_bullet_template",
+    "role_category": "data_scientist",
+    "bullets": [
+        {
+            "text": "Developed ML model achieving 92% accuracy in predicting customer churn, enabling proactive retention strategies that saved $3M annually",
+            "skill_area": "machine_learning",
+            "impact_type": "quantifiable"
+        },
+        {
+            "text": "Built end-to-end data pipeline processing 100GB+ daily, reducing analyst query time from 4 hours to 15 minutes",
+            "skill_area": "data_engineering",
+            "impact_type": "quantifiable"
+        },
+        {
+            "text": "Created interactive dashboards in Tableau serving 200+ stakeholders, democratizing access to business insights",
+            "skill_area": "visualization",
+            "impact_type": "quantifiable"
+        },
+        {
+            "text": "Implemented A/B testing framework that increased experimentation velocity by 5x, leading to 20% improvement in conversion rate",
+            "skill_area": "experimentation",
+            "impact_type": "quantifiable"
+        },
+        {
+            "text": "Deployed NLP pipeline for sentiment analysis processing 500K+ customer reviews, informing product prioritization",
+            "skill_area": "nlp",
+            "impact_type": "quantifiable"
+        }
+    ]
+}

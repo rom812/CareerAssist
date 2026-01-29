@@ -1,0 +1,64 @@
+{
+    "type": "interview_question",
+    "category": "behavioral",
+    "questions": [
+        {
+            "topic": "conflict_resolution",
+            "question": "Tell me about a time you had a conflict with a teammate. How did you handle it?",
+            "what_theyre_testing": "Communication skills, emotional intelligence, problem-solving, ability to maintain professional relationships",
+            "good_answer_structure": "Use the STAR method (Situation, Task, Action, Result). Focus on the resolution and what you learned, not assigning blame. Emphasize how you maintained respect and found common ground.",
+            "red_flags": [
+                "Blaming others entirely",
+                "Not taking any responsibility",
+                "Escalating unnecessarily",
+                "Holding grudges"
+            ]
+        },
+        {
+            "topic": "failure",
+            "question": "Describe a time when you failed at something. What did you learn?",
+            "what_theyre_testing": "Self-awareness, accountability, growth mindset, resilience",
+            "good_answer_structure": "Choose a genuine failure (not a humble brag). Explain the situation, your specific role in the failure, what you learned, and how you've applied that learning since.",
+            "red_flags": [
+                "Choosing trivial examples",
+                "Blaming external factors",
+                "Not showing actual learning",
+                "Picking successes disguised as failures"
+            ]
+        },
+        {
+            "topic": "leadership",
+            "question": "Tell me about a time you led a project or initiative. What was the outcome?",
+            "what_theyre_testing": "Leadership style, ability to influence without authority, project management, results orientation",
+            "good_answer_structure": "Describe the project scope, team dynamics, your specific leadership actions (delegation, motivation, problem-solving), and measurable outcomes.",
+            "red_flags": [
+                "Taking all credit",
+                "Not acknowledging team contributions",
+                "Lacking specific actions",
+                "No clear outcome"
+            ]
+        },
+        {
+            "topic": "pressure",
+            "question": "Describe a situation where you had to work under a tight deadline. How did you manage it?",
+            "what_theyre_testing": "Time management, prioritization, stress handling, communication under pressure",
+            "good_answer_structure": "Explain the deadline pressure, how you prioritized tasks, any trade-offs you made, how you communicated with stakeholders, and the final result.",
+            "red_flags": [
+                "Complaining about the deadline",
+                "Not showing proactive communication",
+                "Sacrificing quality without acknowledgment"
+            ]
+        },
+        {
+            "topic": "influence",
+            "question": "Tell me about a time you had to convince someone to see things your way. How did you approach it?",
+            "what_theyre_testing": "Persuasion skills, empathy, ability to build consensus, stakeholder management",
+            "good_answer_structure": "Show how you understood their perspective first, built rapport, presented your case with evidence, and found a win-win solution.",
+            "red_flags": [
+                "Using authority or manipulation",
+                "Not listening to other perspectives",
+                "Being confrontational"
+            ]
+        }
+    ]
+}

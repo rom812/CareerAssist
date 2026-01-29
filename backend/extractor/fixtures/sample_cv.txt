@@ -1,0 +1,78 @@
+John Smith
+Email: john.smith@email.com | Phone: (555) 123-4567
+LinkedIn: linkedin.com/in/johnsmith | GitHub: github.com/johnsmith
+
+================================================================================
+PROFESSIONAL SUMMARY
+================================================================================
+Experienced software engineer with 8+ years building scalable web applications
+and distributed systems. Expert in Python, cloud infrastructure, and 
+microservices architecture. Passionate about clean code, mentoring, and 
+delivering high-impact solutions.
+
+================================================================================
+EXPERIENCE
+================================================================================
+
+SENIOR SOFTWARE ENGINEER | TechCorp Inc. | San Francisco, CA
+January 2020 - Present
+
+• Led migration of monolithic application to microservices architecture,
+  improving deployment frequency by 300% and reducing release cycle time from
+  2 weeks to 2 days
+• Reduced API latency by 40% through implementation of Redis caching layer
+  and query optimization, handling 10K+ requests per second
+• Mentored team of 4 junior developers through code reviews, pair programming,
+  and weekly tech talks
+• Designed and implemented event-driven architecture using Kafka, processing
+  1M+ events daily with 99.9% reliability
+• Established CI/CD pipelines using GitHub Actions, reducing manual deployment
+  effort by 80%
+
+SOFTWARE ENGINEER | StartupXYZ | San Francisco, CA
+June 2017 - December 2019
+
+• Built real-time data pipeline processing 1M+ events/day using Kafka and Spark
+• Designed and implemented REST APIs serving 10K requests/second with <50ms latency
+• Developed automated testing framework, increasing code coverage from 40% to 85%
+• Collaborated with product team to ship 3 major features ahead of schedule
+
+JUNIOR SOFTWARE DEVELOPER | WebAgency | Los Angeles, CA
+August 2015 - May 2017
+
+• Developed responsive web applications using React and Node.js
+• Built internal tools that automated 20 hours/week of manual reporting
+• Participated in agile sprints and contributed to sprint planning
+
+================================================================================
+SKILLS
+================================================================================
+
+Languages:        Python, JavaScript/TypeScript, Go, SQL
+Frameworks:       FastAPI, Django, React, Node.js, Express
+Cloud:            AWS (EC2, Lambda, S3, RDS, ECS), GCP, Docker, Kubernetes
+Databases:        PostgreSQL, Redis, MongoDB, DynamoDB
+Tools:            Git, GitHub Actions, Jenkins, Terraform, Datadog
+Methodologies:    Agile/Scrum, TDD, CI/CD, Microservices
+
+================================================================================
+EDUCATION
+================================================================================
+
+Bachelor of Science in Computer Science
+State University | Graduated May 2015
+GPA: 3.7/4.0 | Dean's List
+
+================================================================================
+CERTIFICATIONS
+================================================================================
+
+• AWS Solutions Architect - Associate (2023)
+• Kubernetes Administrator - CKA (2022)
+
+================================================================================
+LANGUAGES
+================================================================================
+
+• English (Native)
+• Spanish (Conversational)

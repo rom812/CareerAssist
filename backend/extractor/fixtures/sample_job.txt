@@ -1,0 +1,94 @@
+================================================================================
+SENIOR BACKEND ENGINEER
+================================================================================
+
+Company:    TechCo Inc.
+Location:   San Francisco, CA (Hybrid - 2 days/week in office)
+Department: Platform Engineering
+Reports to: Engineering Manager
+
+================================================================================
+ABOUT THE COMPANY
+================================================================================
+
+TechCo is a fast-growing B2B SaaS platform helping enterprises manage their
+digital workflows. We've raised $50M Series B and are expanding our
+engineering team to build the next generation of our platform.
+
+================================================================================
+ABOUT THE ROLE
+================================================================================
+
+We're looking for a Senior Backend Engineer to join our Platform team. You'll
+be responsible for designing and implementing scalable microservices that
+power our core product. This is a high-impact role where you'll work closely
+with product, design, and other engineering teams.
+
+================================================================================
+RESPONSIBILITIES
+================================================================================
+
+• Design and implement scalable microservices using Python and Go
+• Lead technical design reviews and architecture discussions
+• Mentor junior developers and contribute to hiring
+• Collaborate with product managers to define technical requirements
+• Ensure high availability and performance of critical systems
+• Participate in on-call rotation (1 week per month)
+
+================================================================================
+REQUIREMENTS
+================================================================================
+
+Must Have:
+----------
+• 5+ years of experience in backend development
+• Strong proficiency in Python or Go
+• Experience with Kubernetes and container orchestration
+• Solid understanding of distributed systems and microservices
+• Experience with SQL (PostgreSQL) and NoSQL (Redis, DynamoDB) databases
+• Strong communication skills and ability to work in a team
+• Bachelor's degree in Computer Science or equivalent experience
+
+Nice to Have:
+-------------
+• Experience with event streaming (Kafka, RabbitMQ)
+• Knowledge of machine learning pipelines
+• Experience with infrastructure as code (Terraform)
+• Previous startup experience
+• Contributions to open source projects
+
+================================================================================
+BENEFITS
+================================================================================
+
+• Competitive salary: $180,000 - $220,000 base
+• Equity: 0.05% - 0.15%
+• Health, dental, and vision insurance (100% covered)
+• 401(k) with 4% company match
+• Unlimited PTO (minimum 3 weeks encouraged)
+• $2,000 annual learning budget
+• Home office stipend
+• Gym membership reimbursement
+
+================================================================================
+INTERVIEW PROCESS
+================================================================================
+
+1. Recruiter Screen (30 min)
+2. Technical Phone Screen (60 min)
+3. Virtual Onsite (4 hours):
+   - System Design
+   - Coding (2 rounds)
+   - Behavioral with Hiring Manager
+4. Team Fit / Culture Add (45 min)
+5. Offer
+
+================================================================================
+HOW TO APPLY
+================================================================================
+
+Apply at: careers.techco.com/senior-backend-engineer
+Or email your resume to: jobs@techco.com
+
+TechCo is an equal opportunity employer. We celebrate diversity and are
+committed to creating an inclusive environment for all employees.

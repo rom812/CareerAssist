@@ -1,0 +1,31 @@
+{
+    "type": "cv_bullet_template",
+    "role_category": "product_manager",
+    "bullets": [
+        {
+            "text": "Launched flagship product feature that increased user engagement by 35% and drove $2M in annual recurring revenue",
+            "skill_area": "product_launch",
+            "impact_type": "quantifiable"
+        },
+        {
+            "text": "Led cross-functional team of 12 (engineering, design, marketing) to deliver product on time and 10% under budget",
+            "skill_area": "team_leadership",
+            "impact_type": "quantifiable"
+        },
+        {
+            "text": "Conducted 50+ customer discovery interviews, synthesizing insights into product roadmap that reduced churn by 25%",
+            "skill_area": "customer_research",
+            "impact_type": "quantifiable"
+        },
+        {
+            "text": "Defined and tracked OKRs across 3 product lines, improving feature adoption by 40% through data-driven prioritization",
+            "skill_area": "metrics",
+            "impact_type": "quantifiable"
+        },
+        {
+            "text": "Managed product backlog of 200+ items, maintaining stakeholder alignment through weekly sprint reviews and quarterly planning",
+            "skill_area": "agile",
+            "impact_type": "quantifiable"
+        }
+    ]
+}

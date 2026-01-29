@@ -1,0 +1,47 @@
+{
+    "type": "ats_keyword_guide",
+    "industry": "tech",
+    "role": "data_scientist",
+    "description": "Keywords commonly scanned by ATS systems for data science roles",
+    "must_have_keywords": [
+        "Python",
+        "R",
+        "SQL",
+        "Machine Learning",
+        "Deep Learning",
+        "TensorFlow",
+        "PyTorch",
+        "Scikit-learn",
+        "Pandas",
+        "NumPy",
+        "Data Analysis",
+        "Statistical Modeling",
+        "Jupyter",
+        "Data Visualization"
+    ],
+    "nice_to_have_keywords": [
+        "NLP",
+        "Computer Vision",
+        "Time Series",
+        "Spark",
+        "Hadoop",
+        "BigQuery",
+        "A/B Testing",
+        "Experimentation",
+        "Tableau",
+        "Power BI",
+        "Looker",
+        "MLOps",
+        "Model Deployment",
+        "AWS SageMaker",
+        "Databricks",
+        "Feature Engineering",
+        "ETL"
+    ],
+    "tips": [
+        "Emphasize both technical skills and business impact",
+        "Include specific ML algorithms you've used (XGBoost, Random Forest, etc.)",
+        "Mention cloud platforms for ML deployment",
+        "Quantify model performance (accuracy, AUC, F1 scores)"
+    ]
+}

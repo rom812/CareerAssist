@@ -1,0 +1,49 @@
+{
+    "type": "ats_keyword_guide",
+    "industry": "tech",
+    "role": "product_manager",
+    "description": "Keywords commonly scanned by ATS systems for product management roles",
+    "must_have_keywords": [
+        "Product Management",
+        "Product Strategy",
+        "Agile",
+        "Scrum",
+        "Kanban",
+        "Roadmap",
+        "Product Roadmap",
+        "User Stories",
+        "Requirements",
+        "Stakeholder Management",
+        "Data-Driven",
+        "Analytics",
+        "Customer Research",
+        "User Research"
+    ],
+    "nice_to_have_keywords": [
+        "OKRs",
+        "KPIs",
+        "Metrics",
+        "A/B Testing",
+        "Experimentation",
+        "JIRA",
+        "Confluence",
+        "Asana",
+        "SQL",
+        "Data Analysis",
+        "Figma",
+        "Wireframes",
+        "Prototyping",
+        "Go-to-Market",
+        "Product Launch",
+        "B2B",
+        "B2C",
+        "SaaS",
+        "Platform"
+    ],
+    "tips": [
+        "Emphasize business outcomes and metrics",
+        "Show both strategic thinking and execution ability",
+        "Include specific methodologies you've used",
+        "Mention cross-functional collaboration experience"
+    ]
+}
