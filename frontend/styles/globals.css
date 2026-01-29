@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  
+  /* CareerAssist brand colors */
+  --color-primary: #209DD7;      /* Primary blue */
+  --color-ai-accent: #753991;    /* AI/Purple accent */
+  --color-accent: #FFB707;       /* Yellow accent */
+  --color-dark: #062147;         /* Dark navy */
+  --color-success: #10B981;      /* Green for success */
+  --color-error: #EF4444;        /* Red for errors */
+  
+  /* Font family variables */
+  --font-sans: system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, monospace;
+}
+
+
+
+/* Light mode only - no dark mode for enterprise look */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Stronger pulsing animation for agent activity */
+@keyframes strong-pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.4;
+    transform: scale(0.95);
+  }
+}
+
+.animate-strong-pulse {
+  animation: strong-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Even stronger glow pulse for active agents */
+@keyframes glow-pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 20px rgba(117, 57, 145, 0.5), 0 0 40px rgba(117, 57, 145, 0.3);
+  }
+
+  50% {
+    opacity: 0.7;
+    box-shadow: 0 0 30px rgba(117, 57, 145, 0.8), 0 0 60px rgba(117, 57, 145, 0.5);
+  }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 1.5s ease-in-out infinite;
+}
+
+/* Toast slide-in animation */
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
