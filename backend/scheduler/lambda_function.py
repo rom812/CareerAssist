@@ -47,15 +47,15 @@ def handler(event, context):
     try:
         # Create POST request with topic
         payload = {"topic": topic} if topic else {}
-        data = json.dumps(payload).encode('utf-8')
-        req = urllib.request.Request(
+        request_body = json.dumps(payload).encode('utf-8')
+        http_request = urllib.request.Request(
             url, 
-            data=data,
+            data=request_body,
             method='POST',
             headers={'Content-Type': 'application/json'}
         )
         
-        with urllib.request.urlopen(req, timeout=270) as response:
+        with urllib.request.urlopen(http_request, timeout=270) as response:
             result = response.read().decode('utf-8')
             print(f"Research triggered successfully ({mode}): {result}")
             return {

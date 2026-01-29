@@ -130,15 +130,15 @@ class DatabaseClient:
                     if 'isNull' in field and field['isNull']:
                         row[columns[i]] = None
                     elif 'stringValue' in field:
-                        val = field['stringValue']
+                        field_value = field['stringValue']
                         # Try to parse JSON fields
                         if columns[i].endswith('_json') or columns[i].endswith('_payload') or columns[i] in ['target_roles', 'target_locations', 'parsed_json', 'strengths', 'gaps', 'action_items', 'questions', 'answers', 'evaluations', 'focus_areas', 'company_tips', 'input_data', 'request_payload', 'metadata']:
                             try:
-                                row[columns[i]] = json.loads(val)
+                                row[columns[i]] = json.loads(field_value)
                             except:
-                                row[columns[i]] = val
+                                row[columns[i]] = field_value
                         else:
-                            row[columns[i]] = val
+                            row[columns[i]] = field_value
                     elif 'longValue' in field:
                         row[columns[i]] = field['longValue']
                     elif 'doubleValue' in field:
