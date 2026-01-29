@@ -15,10 +15,6 @@ DEPLOYMENT_CHECKLIST.md
 test_payload*.json
 twin/
 
-# Terraform state lock files
-*.tfstate.lock.info
-tfplan
-
 # ===========================================
 # Python
 # ===========================================
@@ -265,6 +261,18 @@ yarn-error.log*
 terraform.tfstate.d/
 *.tfstate
 *.tfstate.backup
+*.tfstate.lock.info
+tfplan
+tfplan.json
+.terraform.lock.hcl
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
 
 # Lambda deployment packages
 lambda_function.zip
@@ -284,6 +292,29 @@ build_temp/
 *.backup
 node_modules_old_*/
 
+# All zip files (general pattern)
+*.zip
+
 # But do include the scheduler
 !backend/scheduler/lambda_function.zip
 !frontend/lib*.zip
+
+# WARNING: Ignoring all .md files - this includes documentation!
+# If you need specific .md files (like README.md), add exceptions below
+*.md
+
+# Temporary log and status files
+commit_log.txt
+git_branch.txt
+status*.txt
+
+# Large files that aren't needed
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+*.dmg
+*.iso
+*.jar
+*.war
+*.ear
