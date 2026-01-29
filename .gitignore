@@ -15,6 +15,9 @@ DEPLOYMENT_CHECKLIST.md
 test_payload*.json
 twin/
 
+# Test files that may contain hardcoded credentials
+**/trigger_test.py
+
 # ===========================================
 # Python
 # ===========================================

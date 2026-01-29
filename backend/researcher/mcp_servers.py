@@ -16,6 +16,7 @@ def create_playwright_mcp_server(timeout_seconds=60):
     """
     # Base arguments - removed --executable-path as it's not a valid MCP server flag
     args = [
+        "-y",
         "@playwright/mcp@latest",
         "--headless",
         "--isolated", 

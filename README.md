@@ -189,16 +189,6 @@ CareerAssist implements a **specialized agent architecture** where each AI agent
 
 ```
 CareerAssist/
-├── guides/                  # Step-by-step deployment documentation
-│   ├── 1_permissions.md    # AWS IAM setup
-│   ├── 2_sagemaker.md      # Embedding endpoint deployment
-│   ├── 3_ingest.md         # Vector storage setup
-│   ├── 4_researcher.md     # App Runner service
-│   ├── 5_database.md       # Aurora database
-│   ├── 6_agents.md         # Lambda agents deployment
-│   ├── 7_frontend.md       # Frontend deployment
-│   └── 8_enterprise.md     # Monitoring & observability
-│
 ├── backend/
 │   ├── orchestrator/       # Request router agent
 │   ├── extractor/          # CV/Job parser agent
@@ -245,7 +235,7 @@ CareerAssist/
 
 ### Prerequisites
 
-- **AWS Account** with appropriate permissions (see [guides/1_permissions.md](guides/1_permissions.md))
+- **AWS Account** with appropriate permissions
 - **Docker Desktop** (required for Lambda packaging)
 - **Node.js 18+** and **Python 3.11+**
 - **uv** (Python package manager)
@@ -253,16 +243,16 @@ CareerAssist/
 
 ### Quick Start
 
-Follow the deployment guides in order:
+Deploy the infrastructure modules in order using Terraform:
 
-1. **[1_permissions.md](guides/1_permissions.md)** - Set up AWS IAM permissions
-2. **[2_sagemaker.md](guides/2_sagemaker.md)** - Deploy SageMaker embedding endpoint
-3. **[3_ingest.md](guides/3_ingest.md)** - Configure S3 vector storage + ingestion API
-4. **[4_researcher.md](guides/4_researcher.md)** - Deploy App Runner research agent
-5. **[5_database.md](guides/5_database.md)** - Provision Aurora Serverless v2 database
-6. **[6_agents.md](guides/6_agents.md)** - Deploy Lambda AI agents + SQS queue
-7. **[7_frontend.md](guides/7_frontend.md)** - Deploy Next.js frontend + API Gateway
-8. **[8_enterprise.md](guides/8_enterprise.md)** - Add CloudWatch monitoring
+1. **Permissions** - Set up AWS IAM permissions
+2. **SageMaker** - Deploy SageMaker embedding endpoint (`terraform/2_sagemaker`)
+3. **Ingestion** - Configure S3 vector storage + ingestion API (`terraform/3_ingestion`)
+4. **Researcher** - Deploy App Runner research agent (`terraform/4_researcher`)
+5. **Database** - Provision Aurora Serverless v2 database (`terraform/5_database`)
+6. **Agents** - Deploy Lambda AI agents + SQS queue (`terraform/6_agents`)
+7. **Frontend** - Deploy Next.js frontend + API Gateway (`terraform/7_frontend`)
+8. **Monitoring** - Add CloudWatch monitoring (`terraform/8_enterprise`)
 
 ### Local Development
 
@@ -393,7 +383,6 @@ User Request → API Gateway → FastAPI → SQS Queue → Orchestrator → [Par
 
 - **[AGENTS.md](AGENTS.md)** - Detailed agent architecture and specifications
 - **[CLAUDE.md](CLAUDE.md)** - AI assistant context (development workflow)
-- **[guides/architecture.md](guides/architecture.md)** - System architecture deep-dive
 - **[design-log/](design-log/)** - Architectural Decision Records (ADRs)
 
 ---
