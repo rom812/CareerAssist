@@ -321,9 +321,9 @@ class JobApplications(BaseModel):
     
     def create_application(self, user_id: str, app: JobApplicationCreate) -> str:
         """Create a new job application"""
-        data = app.model_dump(exclude_none=True)
-        data['user_id'] = user_id
-        return self.db.insert(self.table_name, data, returning='id')
+        application_data = app.model_dump(exclude_none=True)
+        application_data['user_id'] = user_id
+        return self.db.insert(self.table_name, application_data, returning='id')
     
     def update_status(self, app_id: str, status: str, notes: str = None) -> int:
         """Update application status"""
@@ -377,9 +377,9 @@ class InterviewSessions(BaseModel):
     
     def create_session(self, user_id: str, session: InterviewSessionCreate) -> str:
         """Create a new interview session"""
-        data = session.model_dump(exclude_none=True)
-        data['user_id'] = user_id
-        return self.db.insert(self.table_name, data, returning='id')
+        session_data = session.model_dump(exclude_none=True)
+        session_data['user_id'] = user_id
+        return self.db.insert(self.table_name, session_data, returning='id')
     
     def update_questions(self, session_id: str, questions: List[Dict]) -> int:
         """Update session with questions"""
