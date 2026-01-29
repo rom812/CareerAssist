@@ -20,11 +20,12 @@
 
 **CareerAssist** is a sophisticated AI-powered career platform demonstrating enterprise-grade software engineering practices. This personal project showcases expertise in:
 
-- **Multi-Agent AI Architecture** - 5 specialized AI agents coordinating via event-driven orchestration
+- **Multi-Agent AI Architecture** - 6 specialized AI agents coordinating via event-driven orchestration
 - **AWS Serverless Infrastructure** - Lambda, App Runner, SageMaker, Bedrock, Aurora Serverless v2
 - **Infrastructure as Code** - Modular Terraform with independent state management
 - **Full-Stack Development** - Next.js frontend, FastAPI backend, PostgreSQL database
 - **Vector RAG System** - Custom S3-based vector storage with semantic search
+- **Web Automation** - Playwright MCP for intelligent job board scraping and data extraction
 - **Enterprise Security** - JWT authentication, IAM least privilege, VPC isolation
 
 ### What It Does
@@ -35,6 +36,7 @@ CareerAssist helps job seekers through AI-powered assistance:
 - 📊 **Gap Analysis** - Detailed fit scoring (0-100) with actionable improvement suggestions
 - 🎤 **Interview Preparation** - AI-generated questions based on role and company
 - 📈 **Application Tracking** - Analytics dashboard with success rate insights
+- 🔍 **Job Discovery** - Automated web scraping with Playwright MCP to find relevant open positions across multiple job boards
 
 ---
 
@@ -65,6 +67,7 @@ graph TB
         Analyzer[Analyzer Agent<br/>Gap Analysis]
         Interviewer[Interviewer Agent<br/>Interview Prep]
         Charter[Charter Agent<br/>Analytics]
+        Researcher[Researcher Agent<br/>Web Scraper - Playwright MCP<br/>App Runner]
     end
 
     subgraph AI["🧠 AI Services"]
@@ -87,6 +90,7 @@ graph TB
     Orchestrator --> Analyzer
     Orchestrator --> Interviewer
     Orchestrator --> Charter
+    Orchestrator --> Researcher
 
     Extractor --> Bedrock
     Analyzer --> Bedrock
@@ -94,10 +98,12 @@ graph TB
     Analyzer --> S3Vectors
     Interviewer --> Bedrock
     Charter --> Aurora
+    Researcher --> Bedrock
 
     Extractor --> Aurora
     Analyzer --> Aurora
     Interviewer --> Aurora
+    Researcher --> Aurora
 ```
 
 ### Multi-Agent Orchestration
@@ -111,6 +117,7 @@ CareerAssist implements a **specialized agent architecture** where each AI agent
 | **Analyzer** | Gap analysis and CV rewriting | RAG + Vector Search | Fit scoring (0-100), ATS optimization, template matching |
 | **Interviewer** | Interview question generation and evaluation | Knowledge Base RAG | Behavioral/Technical/Situational questions, STAR method |
 | **Charter** | Application analytics and visualizations | SQL + Bedrock | Success rate tracking, funnel analysis |
+| **Researcher** | Scrapes web for open job postings | Playwright MCP + App Runner | Automated job discovery, multi-site scraping, headless browser automation |
 
 **Design Pattern**: Event-driven orchestration with async processing via SQS queues
 
@@ -146,6 +153,15 @@ CareerAssist implements a **specialized agent architecture** where each AI agent
 - **Time-to-Response**: Histogram analysis of application turnaround times
 - **Skill Gap Insights**: Most frequently missing skills across applications
 
+### 5. Automated Job Discovery
+
+- **Web Scraping Engine**: Playwright MCP-powered browser automation for job boards
+- **Multi-Site Support**: Scrapes LinkedIn, Indeed, Glassdoor, and company career pages
+- **Intelligent Extraction**: Parses job titles, descriptions, requirements, salary ranges
+- **Real-Time Monitoring**: Continuous discovery of newly posted positions matching user criteria
+- **Anti-Detection**: Headless browser with human-like interaction patterns
+- **Structured Storage**: Extracted jobs stored in PostgreSQL with deduplication
+
 ---
 
 ## 🛠️ Tech Stack
@@ -155,7 +171,8 @@ CareerAssist implements a **specialized agent architecture** where each AI agent
 | Component | Technology | Purpose |
 |-----------|-----------|---------|
 | **Compute** | AWS Lambda (Docker) | Serverless agent execution |
-| **Long-Running** | AWS App Runner | Job market research service |
+| **Long-Running** | AWS App Runner | Job market research service (Researcher agent) |
+| **Web Scraping** | Playwright MCP | Browser automation for job discovery |
 | **Database** | Aurora Serverless v2 (PostgreSQL 15) | Transactional data storage |
 | **Vector Store** | Custom S3 Vectors | Cost-effective RAG knowledge base |
 | **LLM** | AWS Bedrock (Nova Pro) | AI agent intelligence |
@@ -377,6 +394,35 @@ User Request → API Gateway → FastAPI → SQS Queue → Orchestrator → [Par
 - Supports batch processing
 - Prevents Lambda timeout cascade failures
 
+### 5. Playwright MCP for Job Discovery
+
+The **Researcher Agent** uses **Model Context Protocol (MCP)** with Playwright for sophisticated web scraping:
+
+```python
+# Playwright MCP integration for browser automation
+from mcp_playwright import browser_navigate, browser_fill_form, browser_click
+
+# Navigate to job board
+await browser_navigate(url="https://careers.company.com/jobs")
+
+# Search for roles matching user criteria
+await browser_fill_form(selector="#search", value="Software Engineer")
+await browser_click(selector="#search-button")
+
+# Extract structured job data with AI parsing
+jobs = await extract_job_listings(page_content)
+```
+
+**Key Capabilities**:
+- **Headless Browser Automation**: Renders JavaScript-heavy job boards that APIs can't access
+- **Anti-Detection**: Human-like interaction patterns, random delays, user agent rotation
+- **Multi-Site Support**: Adapts to different site structures (LinkedIn, Indeed, Glassdoor, company pages)
+- **Intelligent Extraction**: Uses Bedrock to parse unstructured HTML into structured job data
+- **Scheduled Scraping**: EventBridge triggers for continuous job discovery
+- **App Runner Deployment**: Long-running service handles browser instances efficiently
+
+**Why MCP?**: The Model Context Protocol standardizes how AI agents interact with external tools. Playwright MCP provides a clean interface for browser automation, making the Researcher agent code maintainable and testable.
+
 ---
 
 ## 📖 Documentation
@@ -472,12 +518,6 @@ This project showcases proficiency in:
 - Logging and observability
 - Security best practices (IAM, encryption, VPC)
 - Documentation and ADRs
-
----
-
-## 📝 License
-
-This is a personal portfolio project. Feel free to explore the code, but please do not use it for commercial purposes without permission.
 
 ---
 
