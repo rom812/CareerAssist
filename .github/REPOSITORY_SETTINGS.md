@@ -1,37 +1,22 @@
 # GitHub Repository Settings Configuration
-#
-# This file documents the recommended GitHub repository settings
-# for the CareerAssist project to maintain a clean git history.
-#
-# NOTE: These settings must be applied manually in the GitHub web interface
-# at: https://github.com/rom812/CareerAssist/settings
-#
-# Alternatively, use GitHub API or terraform/infrastructure-as-code tools
 
----
-# Repository Settings > Pull Requests
+This document provides instructions for configuring GitHub repository settings to enable squash merge as the default merge strategy for the CareerAssist project.
 
-# Merge button options (enable/disable merge strategies)
-merge_options:
-  # Allow squash merging - RECOMMENDED (keeps history clean)
-  allow_squash_merge: true
-  
-  # Allow merge commits - Can be disabled to enforce squash merge
-  allow_merge_commit: false
-  
-  # Allow rebase merging - Alternative to squash merge
-  allow_rebase_merge: false
-  
-  # Automatically delete head branches after pull requests are merged
-  delete_branch_on_merge: true
+**IMPORTANT:** These settings must be applied manually through the GitHub web interface, GitHub CLI, or GitHub API. This file is documentation only—it is not automatically applied.
 
-# Default merge method when merging PRs
-default_merge_method: "squash"
+## Recommended Merge Settings
 
-# Squash merge commit message
-# Options: "PR_TITLE", "COMMIT_MESSAGES", "BLANK"
-squash_merge_commit_title: "PR_TITLE"
-squash_merge_commit_message: "PR_BODY"
+The following table shows the recommended merge settings for this repository:
+
+| Setting | Value | Purpose |
+|---------|-------|---------|
+| **Allow squash merging** | ✅ Enabled | Combines all PR commits into one (RECOMMENDED) |
+| **Allow merge commits** | ❌ Disabled | Prevents regular merge commits (optional but recommended) |
+| **Allow rebase merging** | ❌ Disabled | Alternative to squash merge (optional) |
+| **Automatically delete head branches** | ✅ Enabled | Cleans up branches after merge |
+| **Default merge method** | `squash` | Use squash merge by default |
+| **Squash merge commit title** | `PR_TITLE` | Use PR title as commit message |
+| **Squash merge commit message** | `PR_BODY` | Use PR body as commit description |
 
 ---
 # Instructions for Applying These Settings
@@ -48,16 +33,15 @@ squash_merge_commit_message: "PR_BODY"
 
 ## Method 2: GitHub CLI (gh)
 ```bash
-# Enable squash merge only
+# Enable squash merge, disable other merge methods, and auto-delete branches
 gh repo edit rom812/CareerAssist \
   --enable-squash-merge \
   --disable-merge-commit \
   --disable-rebase-merge \
   --delete-branch-on-merge
-
-# Set default to squash merge
-gh repo edit rom812/CareerAssist --default-branch main
 ```
+
+**Note:** The GitHub CLI does not currently support setting the default merge method to squash. That must be configured through the web interface under Settings → General → Pull Requests.
 
 ## Method 3: GitHub API
 ```bash

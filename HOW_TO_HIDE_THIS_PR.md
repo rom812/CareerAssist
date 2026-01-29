@@ -25,7 +25,7 @@ This will combine all commits from this PR into a single commit on the main bran
 git checkout main
 
 # Merge with squash (combines all commits into one)
-git merge --squash copilot/hide-pr-from-history
+git merge --squash YOUR_FEATURE_BRANCH
 
 # Commit with a clean message
 git commit -m "Configure repository for clean git history with squash merge"
@@ -34,9 +34,11 @@ git commit -m "Configure repository for clean git history with squash merge"
 git push origin main
 
 # Delete the feature branch
-git branch -d copilot/hide-pr-from-history
-git push origin --delete copilot/hide-pr-from-history
+git branch -d YOUR_FEATURE_BRANCH
+git push origin --delete YOUR_FEATURE_BRANCH
 ```
+
+**Note:** Replace `YOUR_FEATURE_BRANCH` with your actual feature branch name (e.g., `copilot/hide-pr-from-history`).
 
 ## What Happens
 
