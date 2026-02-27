@@ -3,14 +3,15 @@ Aurora Data API Client Wrapper
 Provides a simple interface for database operations
 """
 
-import boto3
 import json
+import logging
 import os
-from typing import List, Dict, Any, Optional, Tuple
 from datetime import date, datetime
 from decimal import Decimal
+from typing import Any
+
+import boto3
 from botocore.exceptions import ClientError
-import logging
 
 # Try to load .env file if it exists
 try:
@@ -55,7 +56,7 @@ class DataAPIClient:
         self.region = os.environ.get("DEFAULT_AWS_REGION", "us-east-1")
         self.client = boto3.client("rds-data", region_name=self.region)
 
-    def execute(self, sql: str, parameters: List[Dict] = None) -> Dict:
+    def execute(self, sql: str, parameters: list[dict] = None) -> dict:
         """
         Execute a SQL statement
 
@@ -85,7 +86,7 @@ class DataAPIClient:
             logger.error(f"Database error: {e}")
             raise
 
-    def query(self, sql: str, parameters: List[Dict] = None) -> List[Dict]:
+    def query(self, sql: str, parameters: list[dict] = None) -> list[dict]:
         """
         Execute a SELECT query and return results as list of dicts
 
@@ -115,7 +116,7 @@ class DataAPIClient:
 
         return results
 
-    def query_one(self, sql: str, parameters: List[Dict] = None) -> Optional[Dict]:
+    def query_one(self, sql: str, parameters: list[dict] = None) -> dict | None:
         """
         Execute a SELECT query and return first result
 
@@ -129,7 +130,7 @@ class DataAPIClient:
         results = self.query(sql, parameters)
         return results[0] if results else None
 
-    def insert(self, table: str, data: Dict, returning: str = None) -> str:
+    def insert(self, table: str, data: dict, returning: str = None) -> str:
         """
         Insert a record into a table
 
@@ -174,7 +175,7 @@ class DataAPIClient:
             return self._extract_value(response["records"][0][0])
         return None
 
-    def update(self, table: str, data: Dict, where: str, where_params: Dict = None) -> int:
+    def update(self, table: str, data: dict, where: str, where_params: dict = None) -> int:
         """
         Update records in a table
 
@@ -216,7 +217,7 @@ class DataAPIClient:
         response = self.execute(sql, parameters)
         return response.get("numberOfRecordsUpdated", 0)
 
-    def delete(self, table: str, where: str, where_params: Dict = None) -> int:
+    def delete(self, table: str, where: str, where_params: dict = None) -> int:
         """
         Delete records from a table
 
@@ -253,7 +254,7 @@ class DataAPIClient:
             resourceArn=self.cluster_arn, secretArn=self.secret_arn, transactionId=transaction_id
         )
 
-    def _build_parameters(self, data: Dict) -> List[Dict]:
+    def _build_parameters(self, data: dict) -> list[dict]:
         """Convert dictionary to Data API parameter format"""
         if not data:
             return []
@@ -274,9 +275,7 @@ class DataAPIClient:
                 param["value"] = {"stringValue": str(value)}
             elif isinstance(value, (date, datetime)):
                 param["value"] = {"stringValue": value.isoformat()}
-            elif isinstance(value, dict):
-                param["value"] = {"stringValue": json.dumps(value)}
-            elif isinstance(value, list):
+            elif isinstance(value, dict) or isinstance(value, list):
                 param["value"] = {"stringValue": json.dumps(value)}
             else:
                 param["value"] = {"stringValue": str(value)}
@@ -285,7 +284,7 @@ class DataAPIClient:
 
         return parameters
 
-    def _extract_value(self, field: Dict) -> Any:
+    def _extract_value(self, field: dict) -> Any:
         """Extract value from Data API field response"""
         if field.get("isNull"):
             return None

@@ -3,12 +3,11 @@
 Package the Reporter Lambda function using Docker for AWS compatibility.
 """
 
-import os
-import sys
-import shutil
-import tempfile
-import subprocess
 import argparse
+import os
+import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 
@@ -29,16 +28,15 @@ def package_lambda():
     reporter_dir = Path(__file__).parent.absolute()
     backend_dir = reporter_dir.parent
 
-
     # Create a temporary directory for packaging - use local dir to avoid Docker shared volume deadlocks on Mac
     # with tempfile.TemporaryDirectory() as temp_dir:
-    if True: # Indentation wrapper to minimize diff, or just remove context
+    if True:  # Indentation wrapper to minimize diff, or just remove context
         # Use a local directory that we clean up manually
         temp_dir = str(reporter_dir / "build_temp")
         if os.path.exists(temp_dir):
             shutil.rmtree(temp_dir)
         os.makedirs(temp_dir)
-        
+
         try:
             temp_path = Path(temp_dir)
 
@@ -51,10 +49,7 @@ def package_lambda():
 
         # Export exact requirements from uv.lock (excluding the editable database package)
         print("Exporting requirements from uv.lock...")
-        requirements_result = run_command(
-            ["uv", "export", "--no-hashes", "--no-emit-project"], cwd=str(reporter_dir)
-        )
-
+        requirements_result = run_command(["uv", "export", "--no-hashes", "--no-emit-project"], cwd=str(reporter_dir))
 
         # Filter out packages that don't work in Lambda or are already included
         filtered_requirements = []
@@ -96,7 +91,7 @@ def package_lambda():
             "/bin/bash",
             "public.ecr.aws/lambda/python:3.12",
             "-c",
-            """cd /build && pip install --target ./package -r requirements.txt --no-cache-dir && pip install --target ./package --no-deps /build/database"""
+            """cd /build && pip install --target ./package -r requirements.txt --no-cache-dir && pip install --target ./package --no-deps /build/database""",
         ]
 
         run_command(docker_cmd)
@@ -138,9 +133,7 @@ def deploy_lambda(zip_path):
     try:
         # Try to update existing function
         with open(zip_path, "rb") as f:
-            response = lambda_client.update_function_code(
-                FunctionName=function_name, ZipFile=f.read()
-            )
+            response = lambda_client.update_function_code(FunctionName=function_name, ZipFile=f.read())
         print(f"Successfully updated Lambda function: {function_name}")
         print(f"Function ARN: {response['FunctionArn']}")
     except lambda_client.exceptions.ResourceNotFoundException:

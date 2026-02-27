@@ -1,0 +1,40 @@
+name: Integration Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+
+jobs:
+  integration:
+    name: Full Integration Tests
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 10
+    env:
+      DATABASE_CLUSTER_ARN: ${{ secrets.DATABASE_CLUSTER_ARN }}
+      DATABASE_SECRET_ARN: ${{ secrets.DATABASE_SECRET_ARN }}
+      DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+      AWS_REGION_NAME: ${{ secrets.AWS_REGION }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Install dependencies
+        working-directory: backend
+        run: uv sync
+
+      - name: Run integration tests
+        working-directory: backend
+        run: uv run test_full.py

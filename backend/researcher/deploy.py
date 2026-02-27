@@ -4,11 +4,12 @@ Deploy researcher service to AWS App Runner
 Cross-platform deployment script for Mac/Windows/Linux
 """
 
+import json
+import os
 import subprocess
 import sys
-import os
-import json
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -18,9 +19,7 @@ load_dotenv(override=True)
 def run_command(cmd, capture_output=False, shell=False):
     """Run a command and handle errors."""
     try:
-        result = subprocess.run(
-            cmd, shell=shell, capture_output=capture_output, text=True, check=True
-        )
+        result = subprocess.run(cmd, shell=shell, capture_output=capture_output, text=True, check=True)
         if capture_output:
             return result.stdout.strip()
         return None
@@ -59,9 +58,7 @@ def main():
 
     try:
         os.chdir(terraform_dir)
-        ecr_url = run_command(
-            ["terraform", "output", "-raw", "ecr_repository_url"], capture_output=True
-        )
+        ecr_url = run_command(["terraform", "output", "-raw", "ecr_repository_url"], capture_output=True)
     finally:
         os.chdir(original_dir)
 
@@ -73,9 +70,7 @@ def main():
 
     # Login to ECR
     print("\nLogging in to ECR...")
-    password = run_command(
-        ["aws", "ecr", "get-login-password", "--region", region], capture_output=True
-    )
+    password = run_command(["aws", "ecr", "get-login-password", "--region", region], capture_output=True)
 
     login_cmd = ["docker", "login", "--username", "AWS", "--password-stdin", ecr_url]
     login_process = subprocess.Popen(
@@ -122,9 +117,7 @@ def main():
     run_command(["docker", "push", f"{ecr_url}:latest"])
 
     print("\n✅ Docker image pushed successfully!")
-    print(
-        "\nNext step: Run 'terraform apply' in terraform/4_researcher to create the App Runner service."
-    )
+    print("\nNext step: Run 'terraform apply' in terraform/4_researcher to create the App Runner service.")
 
     # Get App Runner service ARN
     print("\nGetting App Runner service details...")
@@ -190,9 +183,7 @@ def main():
                                         "RuntimeEnvironmentVariables": {
                                             "OPENAI_API_KEY": os.environ.get("OPENAI_API_KEY", ""),
                                             "CAREER_API_KEY": os.environ.get("CAREER_API_KEY", ""),
-                                            "CAREER_API_ENDPOINT": os.environ.get(
-                                                "CAREER_API_ENDPOINT", ""
-                                            ),
+                                            "CAREER_API_ENDPOINT": os.environ.get("CAREER_API_ENDPOINT", ""),
                                             # Aurora database access for discovered jobs
                                             "AURORA_CLUSTER_ARN": os.environ.get("AURORA_CLUSTER_ARN", ""),
                                             "AURORA_SECRET_ARN": os.environ.get("AURORA_SECRET_ARN", ""),
@@ -260,9 +251,9 @@ def main():
                             capture_output=True,
                         )
 
-                        print(f"\n🚀 Your service is available at:")
+                        print("\n🚀 Your service is available at:")
                         print(f"   https://{service_url}")
-                        print(f"\nTest it with:")
+                        print("\nTest it with:")
                         print(f"   curl https://{service_url}/health")
                         break
                     elif status == "OPERATION_IN_PROGRESS":
@@ -290,7 +281,7 @@ def main():
                             time.sleep(2)
                             continue
                         elif operation_status == "FAILED":
-                            print(f"\n❌ Deployment failed!")
+                            print("\n❌ Deployment failed!")
                             print("Check the AWS Console for error details.")
                             break
                         else:
@@ -298,9 +289,7 @@ def main():
                             # Show progress every 30 seconds
                             if attempts > 0 and attempts % 6 == 0:
                                 elapsed_minutes = (attempts * 5) / 60
-                                print(
-                                    f" ({elapsed_minutes:.1f} minutes elapsed)", end="", flush=True
-                                )
+                                print(f" ({elapsed_minutes:.1f} minutes elapsed)", end="", flush=True)
                             time.sleep(5)
                             attempts += 1
                     else:
@@ -311,9 +300,7 @@ def main():
                     print("\n⚠️ Deployment is taking longer than expected.")
                     print("Check the status in the AWS Console.")
             else:
-                print(
-                    "\nApp Runner service not found. You may need to run 'terraform apply' first."
-                )
+                print("\nApp Runner service not found. You may need to run 'terraform apply' first.")
                 print("\nTo manually deploy:")
                 print("  1. Go to AWS Console > App Runner")
                 print("  2. Select 'career-researcher' service")

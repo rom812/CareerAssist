@@ -9,22 +9,21 @@ This script ensures Lambda functions are properly updated by:
 Usage:
     cd backend
     uv run deploy_all_lambdas.py [--package]
-    
+
 Options:
     --package    Force re-packaging of all Lambda functions before deployment
 """
 
-import boto3
-import sys
-import subprocess
 import os
+import subprocess
+import sys
 from pathlib import Path
-from typing import List, Tuple
+
 
 def taint_and_deploy_via_terraform() -> bool:
     """
     Deploy Lambda functions using Terraform with forced recreation.
-    
+
     Returns:
         True if successful, False otherwise
     """
@@ -33,42 +32,39 @@ def taint_and_deploy_via_terraform() -> bool:
     if not terraform_dir.exists():
         print(f"❌ Terraform directory not found: {terraform_dir}")
         return False
-    
+
     # Lambda function names to taint
-    lambda_functions = ['orchestrator', 'extractor', 'analyzer', 'charter', 'interviewer']
-    
+    lambda_functions = ["orchestrator", "extractor", "analyzer", "charter", "interviewer"]
+
     print("📌 Step 1: Tainting Lambda functions to force recreation...")
     print("-" * 50)
-    
+
     # Taint each Lambda function
     for func in lambda_functions:
         print(f"   Tainting aws_lambda_function.{func}...")
         result = subprocess.run(
-            ['terraform', 'taint', f'aws_lambda_function.{func}'],
-            cwd=terraform_dir,
-            capture_output=True,
-            text=True
+            ["terraform", "taint", f"aws_lambda_function.{func}"], cwd=terraform_dir, capture_output=True, text=True
         )
-        
+
         if result.returncode == 0 or "already" in result.stderr:
             print(f"      ✓ {func} marked for recreation")
         elif "No such resource instance" in result.stderr:
             print(f"      ⚠️ {func} doesn't exist (will be created)")
         else:
             print(f"      ⚠️ Warning: {result.stderr[:100]}")
-    
+
     print()
     print("🚀 Step 2: Running terraform apply...")
     print("-" * 50)
-    
+
     # Run terraform apply
     result = subprocess.run(
-        ['terraform', 'apply', '-auto-approve'],
+        ["terraform", "apply", "-auto-approve"],
         cwd=terraform_dir,
         capture_output=False,  # Show output directly
-        text=True
+        text=True,
     )
-    
+
     if result.returncode == 0:
         print()
         print("✅ Terraform deployment completed successfully!")
@@ -78,84 +74,76 @@ def taint_and_deploy_via_terraform() -> bool:
         print("❌ Terraform deployment failed!")
         return False
 
+
 def package_lambda(service_name: str, service_dir: Path) -> bool:
     """
     Package a Lambda function using package_docker.py.
-    
+
     Args:
         service_name: Name of the service (e.g., 'planner')
         service_dir: Path to the service directory
-        
+
     Returns:
         True if successful, False otherwise
     """
     print(f"   📦 Packaging {service_name}...")
-    
-    package_script = service_dir / 'package_docker.py'
+
+    package_script = service_dir / "package_docker.py"
     if not package_script.exists():
         print(f"      ✗ package_docker.py not found in {service_dir}")
         return False
-    
+
     try:
         # Run uv run package_docker.py in the service directory
-        result = subprocess.run(
-            ['uv', 'run', 'package_docker.py'],
-            cwd=service_dir,
-            capture_output=True,
-            text=True
-        )
-        
+        result = subprocess.run(["uv", "run", "package_docker.py"], cwd=service_dir, capture_output=True, text=True)
+
         if result.returncode == 0:
             # Check if zip was created
-            zip_path = service_dir / f'{service_name}_lambda.zip'
+            zip_path = service_dir / f"{service_name}_lambda.zip"
             if zip_path.exists():
                 size_mb = zip_path.stat().st_size / (1024 * 1024)
                 print(f"      ✓ Created {size_mb:.1f} MB package")
                 return True
             else:
-                print(f"      ✗ Package not created")
+                print("      ✗ Package not created")
                 return False
         else:
             print(f"      ✗ Packaging failed: {result.stderr}")
             return False
-            
+
     except Exception as e:
         print(f"      ✗ Error running package_docker.py: {e}")
         return False
 
+
 def main():
     """Main deployment function."""
     # Check for --package flag
-    force_package = '--package' in sys.argv
-    
+    force_package = "--package" in sys.argv
+
     print("🎯 Deploying CareerAssist Agent Lambda Functions (via Terraform)")
     print("=" * 50)
-    
 
     # Get AWS account ID using AWS CLI directly to avoid boto3/environment issues
     try:
         # Check if AWS CLI is installed
-        subprocess.run(['aws', '--version'], capture_output=True, check=True)
-        
+        subprocess.run(["aws", "--version"], capture_output=True, check=True)
+
         # Get caller identity
         result = subprocess.run(
-            ['aws', 'sts', 'get-caller-identity', '--output', 'json'],
-            capture_output=True,
-            text=True,
-            check=True
+            ["aws", "sts", "get-caller-identity", "--output", "json"], capture_output=True, text=True, check=True
         )
         import json
+
         identity = json.loads(result.stdout)
-        account_id = identity['Account']
-        
+        account_id = identity["Account"]
+
         # Get region
-        result = subprocess.run(
-            ['aws', 'configure', 'get', 'region'],
-            capture_output=True,
-            text=True
+        result = subprocess.run(["aws", "configure", "get", "region"], capture_output=True, text=True)
+        region = (
+            result.stdout.strip() or os.environ.get("AWS_DEFAULT_REGION") or os.environ.get("AWS_REGION", "us-east-1")
         )
-        region = result.stdout.strip() or os.environ.get('AWS_DEFAULT_REGION') or os.environ.get('AWS_REGION', 'us-east-1')
-        
+
         print(f"AWS Account: {account_id}")
         print(f"AWS Region: {region}")
     except FileNotFoundError:
@@ -165,26 +153,26 @@ def main():
         print(f"❌ Failed to get AWS account info: {e}")
         print("   Make sure your AWS credentials are configured")
         sys.exit(1)
-    
+
     print()
-    
+
     # Define Lambda functions to check/package
     backend_dir = Path(__file__).parent
     services = [
-        ('orchestrator', backend_dir / 'orchestrator' / 'orchestrator_lambda.zip'),
-        ('extractor', backend_dir / 'extractor' / 'extractor_lambda.zip'),
-        ('analyzer', backend_dir / 'analyzer' / 'analyzer_lambda.zip'),
-        ('charter', backend_dir / 'charter' / 'charter_lambda.zip'),
-        ('interviewer', backend_dir / 'interviewer' / 'interviewer_lambda.zip'),
+        ("orchestrator", backend_dir / "orchestrator" / "orchestrator_lambda.zip"),
+        ("extractor", backend_dir / "extractor" / "extractor_lambda.zip"),
+        ("analyzer", backend_dir / "analyzer" / "analyzer_lambda.zip"),
+        ("charter", backend_dir / "charter" / "charter_lambda.zip"),
+        ("interviewer", backend_dir / "interviewer" / "interviewer_lambda.zip"),
     ]
-    
+
     # Check if packages exist and optionally package them
     print("📋 Checking deployment packages...")
     services_to_package = []
-    
+
     for service_name, zip_path in services:
         service_dir = backend_dir / service_name
-        
+
         if force_package:
             # Force re-packaging all services
             services_to_package.append((service_name, service_dir))
@@ -195,27 +183,30 @@ def main():
         else:
             print(f"   ✗ {service_name}: Not found")
             services_to_package.append((service_name, service_dir))
-    
+
     # Package missing or all services if requested
     if services_to_package:
         print()
         print("📦 Packaging Lambda functions...")
         failed_packages = []
-        
+
         for service_name, service_dir in services_to_package:
             if not package_lambda(service_name, service_dir):
                 failed_packages.append(service_name)
-        
+
         if failed_packages:
             print()
             print(f"❌ Failed to package: {', '.join(failed_packages)}")
             print("   Make sure Docker is running and package_docker.py exists")
-            response = input("Continue anyway? (y/N): ")
-            if response.lower() != 'y':
-                sys.exit(1)
-    
+            if os.environ.get("CI"):
+                print("   CI mode: continuing despite packaging failures")
+            else:
+                response = input("Continue anyway? (y/N): ")
+                if response.lower() != "y":
+                    sys.exit(1)
+
     print()
-    
+
     # Deploy via Terraform with forced recreation
     if taint_and_deploy_via_terraform():
         print()
@@ -239,6 +230,7 @@ def main():
         print("   3. Verify AWS credentials and permissions")
         print("   4. Check terraform state: cd terraform/6_agents && terraform plan")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

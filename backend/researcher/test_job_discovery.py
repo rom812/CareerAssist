@@ -4,11 +4,12 @@ Test job discovery mode of the CareerAssist researcher
 """
 
 import asyncio
+
+from agents import Agent, Runner
 from context import get_agent_instructions
+from dotenv import load_dotenv
 from mcp_servers import create_playwright_mcp_server
 from tools import store_discovered_job
-from agents import Agent, Runner
-from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
@@ -45,6 +46,7 @@ async def test_job_discovery():
     except Exception as e:
         print(f"\n❌ Error: {e}")
         import traceback
+
         traceback.print_exc()
 
 

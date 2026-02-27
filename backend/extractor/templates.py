@@ -9,7 +9,7 @@ EXTRACTION GUIDELINES:
 1. CONTACT INFORMATION:
    - Extract full name, email, phone, location
    - Look for LinkedIn, GitHub, portfolio URLs
-   
+
 2. PROFESSIONAL SUMMARY:
    - Extract the summary or objective section
    - If no explicit summary, infer from the overall CV

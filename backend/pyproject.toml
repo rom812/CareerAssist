@@ -18,5 +18,25 @@ members = [
     "scheduler",
 ]
 
+[dependency-groups]
+dev = [
+    "ruff>=0.9.0",
+    "mypy>=1.14.0",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+exclude = [".venv", "build_temp", "__pycache__", ".aws-sam", "database/test_data_api.py", "interviewer/database/test_data_api.py"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501", "B008", "E402", "B904", "E741", "E722", "SIM102", "SIM105", "SIM108", "SIM101"]
+
+[tool.ruff.lint.per-file-ignores]
+"test_*.py" = ["F841"]
+"**/lambda_handler.py" = ["F841", "F821"]
+"**/agent.py" = ["F401"]
+
 [tool.uv.sources]
 career-database = { workspace = true }

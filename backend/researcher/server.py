@@ -2,22 +2,21 @@
 CareerAssist Researcher Service - Career Research Agent
 """
 
-import os
 import logging
-from datetime import datetime, UTC
-from typing import Optional
+import os
+from datetime import UTC, datetime
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from dotenv import load_dotenv
 from agents import Agent, Runner, trace
 from agents.extensions.models.litellm_model import LitellmModel
+from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
 # Suppress LiteLLM warnings about optional dependencies
 logging.getLogger("LiteLLM").setLevel(logging.CRITICAL)
 
 # Import from our modules
-from context import get_agent_instructions, DEFAULT_RESEARCH_PROMPT
+from context import DEFAULT_RESEARCH_PROMPT, get_agent_instructions
 from mcp_servers import create_playwright_mcp_server
 from tools import ingest_career_document, store_research_finding
 
@@ -29,7 +28,7 @@ app = FastAPI(title="Career Researcher Service")
 
 # Request model
 class ResearchRequest(BaseModel):
-    topic: Optional[str] = None  # Optional - if not provided, agent picks a topic
+    topic: str | None = None  # Optional - if not provided, agent picks a topic
 
 
 async def run_research_agent(topic: str = None) -> str:
@@ -172,9 +171,7 @@ async def test_bedrock():
         try:
             bedrock_client = boto3.client("bedrock", region_name="us-west-2")
             models = bedrock_client.list_foundation_models()
-            openai_models = [
-                m["modelId"] for m in models["modelSummaries"] if "openai" in m["modelId"].lower()
-            ]
+            openai_models = [m["modelId"] for m in models["modelSummaries"] if "openai" in m["modelId"].lower()]
         except Exception as list_error:
             openai_models = f"Error listing: {str(list_error)}"
 

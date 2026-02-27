@@ -4,12 +4,12 @@ Seed data for CareerAssist
 Loads sample CV templates, interview questions, and testing data
 """
 
-import os
 import json
+import os
+
 import boto3
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
-from datetime import datetime
 
 # Load environment variables
 load_dotenv(override=True)
@@ -40,8 +40,8 @@ Software Engineer | john.doe@email.com | (555) 123-4567
 San Francisco, CA | linkedin.com/in/johndoe | github.com/johndoe
 
 PROFESSIONAL SUMMARY
-Experienced software engineer with 5+ years of experience building scalable web applications. 
-Proficient in Python, JavaScript, and cloud technologies. Passionate about clean code and 
+Experienced software engineer with 5+ years of experience building scalable web applications.
+Proficient in Python, JavaScript, and cloud technologies. Passionate about clean code and
 test-driven development.
 
 TECHNICAL SKILLS
@@ -93,7 +93,7 @@ CERTIFICATIONS
                 {"name": "React", "proficiency": "proficient", "years": 4},
                 {"name": "AWS", "proficiency": "proficient", "years": 3},
                 {"name": "Docker", "proficiency": "proficient", "years": 3},
-                {"name": "PostgreSQL", "proficiency": "proficient", "years": 4}
+                {"name": "PostgreSQL", "proficiency": "proficient", "years": 4},
             ],
             "experience": [
                 {
@@ -101,10 +101,10 @@ CERTIFICATIONS
                     "role": "Senior Software Engineer",
                     "start_date": "2022-01",
                     "end_date": "Present",
-                    "is_current": True
+                    "is_current": True,
                 }
-            ]
-        }
+            ],
+        },
     },
     {
         "version_name": "Data Scientist",
@@ -114,8 +114,8 @@ Data Scientist | sarah.johnson@email.com | (555) 987-6543
 New York, NY | linkedin.com/in/sarahjohnson
 
 PROFESSIONAL SUMMARY
-Data Scientist with 4 years of experience in machine learning, statistical analysis, and 
-data visualization. Expert in developing predictive models and extracting insights from 
+Data Scientist with 4 years of experience in machine learning, statistical analysis, and
+data visualization. Expert in developing predictive models and extracting insights from
 complex datasets to drive business decisions.
 
 TECHNICAL SKILLS
@@ -169,10 +169,10 @@ CERTIFICATIONS
                 {"name": "Machine Learning", "proficiency": "expert", "years": 4},
                 {"name": "TensorFlow", "proficiency": "proficient", "years": 3},
                 {"name": "SQL", "proficiency": "expert", "years": 4},
-                {"name": "AWS SageMaker", "proficiency": "proficient", "years": 2}
-            ]
-        }
-    }
+                {"name": "AWS SageMaker", "proficiency": "proficient", "years": 2},
+            ],
+        },
+    },
 ]
 
 
@@ -192,11 +192,11 @@ SAMPLE_JOBS = [
 Senior Backend Engineer - TechStartup
 
 About Us:
-TechStartup is a fast-growing company revolutionizing the fintech space. We're looking for 
+TechStartup is a fast-growing company revolutionizing the fintech space. We're looking for
 passionate engineers to join our team.
 
 Role:
-We're seeking a Senior Backend Engineer to design and build scalable systems that power 
+We're seeking a Senior Backend Engineer to design and build scalable systems that power
 our financial platform.
 
 Requirements:
@@ -238,16 +238,24 @@ Benefits:
                 {"text": "5+ years of backend development experience", "type": "must_have", "category": "experience"},
                 {"text": "Strong proficiency in Python or Go", "type": "must_have", "category": "technical"},
                 {"text": "Experience with microservices architecture", "type": "must_have", "category": "technical"},
-                {"text": "Solid understanding of SQL and NoSQL databases", "type": "must_have", "category": "technical"},
-                {"text": "Experience with cloud platforms (AWS preferred)", "type": "must_have", "category": "technical"}
+                {
+                    "text": "Solid understanding of SQL and NoSQL databases",
+                    "type": "must_have",
+                    "category": "technical",
+                },
+                {
+                    "text": "Experience with cloud platforms (AWS preferred)",
+                    "type": "must_have",
+                    "category": "technical",
+                },
             ],
             "nice_to_have": [
                 {"text": "Experience in fintech or financial services", "type": "nice_to_have", "category": "domain"},
                 {"text": "Knowledge of Kubernetes and Docker", "type": "nice_to_have", "category": "technical"},
-                {"text": "Experience with event-driven architecture", "type": "nice_to_have", "category": "technical"}
+                {"text": "Experience with event-driven architecture", "type": "nice_to_have", "category": "technical"},
             ],
-            "ats_keywords": ["Python", "Go", "microservices", "AWS", "SQL", "NoSQL", "backend", "scalable"]
-        }
+            "ats_keywords": ["Python", "Go", "microservices", "AWS", "SQL", "NoSQL", "backend", "scalable"],
+        },
     },
     {
         "company_name": "DataCorp",
@@ -289,8 +297,8 @@ Benefits:
 - Stock options
 - Learning budget
 - Flexible hours
-"""
-    }
+""",
+    },
 ]
 
 
@@ -316,6 +324,7 @@ SAMPLE_SKILL_CATEGORIES = [
 # Database Operations
 # ==============================================================================
 
+
 def execute_sql(sql: str, parameters: list = None) -> dict:
     """Execute a SQL statement"""
     try:
@@ -336,17 +345,17 @@ def execute_sql(sql: str, parameters: list = None) -> dict:
 def create_test_user() -> str:
     """Create a test user and return their ID"""
     print("\n👤 Creating test user...")
-    
+
     # Check if test user exists
     sql = "SELECT id FROM user_profiles WHERE clerk_user_id = :clerk_id"
     params = [{"name": "clerk_id", "value": {"stringValue": "test_user_001"}}]
     result = execute_sql(sql, params)
-    
+
     if result and result.get("records"):
         user_id = result["records"][0][0]["stringValue"]
         print(f"    ✅ Test user already exists: {user_id}")
         return user_id
-    
+
     # Create new test user
     sql = """
         INSERT INTO user_profiles (clerk_user_id, full_name, email, target_roles, target_locations, years_of_experience)
@@ -362,12 +371,12 @@ def create_test_user() -> str:
         {"name": "years", "value": {"longValue": 5}},
     ]
     result = execute_sql(sql, params)
-    
+
     if result and result.get("records"):
         user_id = result["records"][0][0]["stringValue"]
         print(f"    ✅ Created test user: {user_id}")
         return user_id
-    
+
     print("    ❌ Failed to create test user")
     return None
 
@@ -375,7 +384,7 @@ def create_test_user() -> str:
 def seed_cv_versions(user_id: str):
     """Seed sample CV versions"""
     print("\n📄 Seeding CV versions...")
-    
+
     for i, cv in enumerate(SAMPLE_CVS):
         sql = """
             INSERT INTO cv_versions (user_id, raw_text, parsed_json, version_name, is_primary)
@@ -400,10 +409,10 @@ def seed_cv_versions(user_id: str):
 def seed_job_postings(user_id: str):
     """Seed sample job postings"""
     print("\n💼 Seeding job postings...")
-    
+
     for job in SAMPLE_JOBS:
         sql = """
-            INSERT INTO job_postings (user_id, company_name, role_title, raw_text, parsed_json, 
+            INSERT INTO job_postings (user_id, company_name, role_title, raw_text, parsed_json,
                                       location, remote_policy, salary_min, salary_max)
             VALUES (:user_id::uuid, :company, :role, :raw_text, :parsed_json::jsonb,
                     :location, :remote, :salary_min, :salary_max)
@@ -430,7 +439,7 @@ def seed_job_postings(user_id: str):
 def seed_skill_categories():
     """Seed skill categories reference data"""
     print("\n🏷️  Seeding skill categories...")
-    
+
     for skill in SAMPLE_SKILL_CATEGORIES:
         sql = """
             INSERT INTO skill_categories (name, category_type, aliases)
@@ -452,14 +461,14 @@ def seed_skill_categories():
 def verify_data():
     """Verify seeded data"""
     print("\n🔍 Verifying data...")
-    
+
     tables = [
         ("user_profiles", "User profiles"),
         ("cv_versions", "CV versions"),
         ("job_postings", "Job postings"),
         ("skill_categories", "Skill categories"),
     ]
-    
+
     for table, name in tables:
         sql = f"SELECT COUNT(*) as count FROM {table}"
         result = execute_sql(sql)
@@ -473,21 +482,21 @@ def main():
     print("=" * 50)
     print(f"Database: {database}")
     print(f"Region: {region}")
-    
+
     # Create test user
     user_id = create_test_user()
     if not user_id:
         print("\n❌ Cannot proceed without test user")
         exit(1)
-    
+
     # Seed data
     seed_cv_versions(user_id)
     seed_job_postings(user_id)
     seed_skill_categories()
-    
+
     # Verify
     verify_data()
-    
+
     print("\n" + "=" * 50)
     print("✅ Seed data loaded successfully!")
     print("\n📝 Next steps:")

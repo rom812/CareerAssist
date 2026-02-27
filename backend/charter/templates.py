@@ -2,8 +2,6 @@
 Prompt templates for the Charter Agent - Application Analytics.
 """
 
-import json
-
 CHARTER_INSTRUCTIONS = """You are a Career Analytics Agent that creates visualization data for job application tracking.
 
 Your task is to analyze application data and output JSON charts showing insights about the job search.
@@ -119,7 +117,7 @@ Remember: Output ONLY the JSON object. No explanations, no text before or after.
 
 def create_charter_task(analysis: str, applications_data: dict) -> str:
     """Generate the task prompt for the Charter agent."""
-    
+
     return f"""Analyze this job application data and create 4-6 visualization charts.
 
 {analysis}

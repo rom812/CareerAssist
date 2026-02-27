@@ -6,69 +6,60 @@ Provides database models, schemas, and Data API client
 from .client import DataAPIClient
 from .models import Database
 from .schemas import (
-    # Types
-    ProficiencyLevel,
-    SeniorityLevel,
-    RemotePolicy,
-    SkillCategory,
-    RequirementType,
-    GapSeverity,
-    InterviewType,
-    QuestionDifficulty,
-    SessionType,
+    AnswerEvaluation,
+    ApplicationAnalytics,
+    # Analytics schemas
+    ApplicationFunnelData,
     ApplicationStatus,
-    JobType,
-    JobStatus,
-    
-    # User schemas
-    UserProfileCreate,
-    UserProfileResponse,
-    
-    # CV schemas
-    SkillEntry,
-    ExperienceEntry,
-    EducationEntry,
     CVProfile,
-    CVVersionCreate,
-    CVVersionResponse,
-    
-    # Job posting schemas
-    JobRequirement,
-    JobProfile,
-    JobPostingCreate,
-    JobPostingResponse,
-    
-    # Gap analysis schemas
-    GapItem,
-    GapAnalysis,
-    GapAnalysisCreate,
-    GapAnalysisResponse,
-    
     # CV rewrite schemas
     CVRewrite,
     CVRewriteResponse,
-    
-    # Job application schemas
-    JobApplicationCreate,
-    JobApplicationUpdate,
-    JobApplicationResponse,
-    
+    CVVersionCreate,
+    CVVersionResponse,
+    EducationEntry,
+    ExperienceEntry,
+    GapAnalysis,
+    GapAnalysisCreate,
+    GapAnalysisResponse,
+    # Gap analysis schemas
+    GapItem,
+    GapSeverity,
+    InterviewPack,
     # Interview schemas
     InterviewQuestion,
-    AnswerEvaluation,
-    InterviewPack,
     InterviewSessionCreate,
     InterviewSessionResponse,
-    
+    InterviewType,
+    # Job application schemas
+    JobApplicationCreate,
+    JobApplicationResponse,
+    JobApplicationUpdate,
     # Async job schemas
     JobCreate,
-    JobUpdate,
+    JobPostingCreate,
+    JobPostingResponse,
+    JobProfile,
+    # Job posting schemas
+    JobRequirement,
     JobResponse,
-    
-    # Analytics schemas
-    ApplicationFunnelData,
+    JobStatus,
+    JobType,
+    JobUpdate,
+    # Types
+    ProficiencyLevel,
+    QuestionDifficulty,
+    RemotePolicy,
+    RequirementType,
+    SeniorityLevel,
+    SessionType,
+    SkillCategory,
+    # CV schemas
+    SkillEntry,
     SkillGapFrequency,
-    ApplicationAnalytics,
+    # User schemas
+    UserProfileCreate,
+    UserProfileResponse,
 )
 
 # Backwards compatibility aliases
@@ -76,71 +67,61 @@ UserCreate = UserProfileCreate
 
 __all__ = [
     # Core
-    'Database',
-    'DataAPIClient',
-    
+    "Database",
+    "DataAPIClient",
     # Types
-    'ProficiencyLevel',
-    'SeniorityLevel',
-    'RemotePolicy',
-    'SkillCategory',
-    'RequirementType',
-    'GapSeverity',
-    'InterviewType',
-    'QuestionDifficulty',
-    'SessionType',
-    'ApplicationStatus',
-    'JobType',
-    'JobStatus',
-    
+    "ProficiencyLevel",
+    "SeniorityLevel",
+    "RemotePolicy",
+    "SkillCategory",
+    "RequirementType",
+    "GapSeverity",
+    "InterviewType",
+    "QuestionDifficulty",
+    "SessionType",
+    "ApplicationStatus",
+    "JobType",
+    "JobStatus",
     # User
-    'UserCreate',
-    'UserProfileCreate',
-    'UserProfileResponse',
-    
+    "UserCreate",
+    "UserProfileCreate",
+    "UserProfileResponse",
     # CV
-    'SkillEntry',
-    'ExperienceEntry',
-    'EducationEntry',
-    'CVProfile',
-    'CVVersionCreate',
-    'CVVersionResponse',
-    
+    "SkillEntry",
+    "ExperienceEntry",
+    "EducationEntry",
+    "CVProfile",
+    "CVVersionCreate",
+    "CVVersionResponse",
     # Job Posting
-    'JobRequirement',
-    'JobProfile',
-    'JobPostingCreate',
-    'JobPostingResponse',
-    
+    "JobRequirement",
+    "JobProfile",
+    "JobPostingCreate",
+    "JobPostingResponse",
     # Gap Analysis
-    'GapItem',
-    'GapAnalysis',
-    'GapAnalysisCreate',
-    'GapAnalysisResponse',
-    
+    "GapItem",
+    "GapAnalysis",
+    "GapAnalysisCreate",
+    "GapAnalysisResponse",
     # CV Rewrite
-    'CVRewrite',
-    'CVRewriteResponse',
-    
+    "CVRewrite",
+    "CVRewriteResponse",
     # Job Application
-    'JobApplicationCreate',
-    'JobApplicationUpdate',
-    'JobApplicationResponse',
-    
+    "JobApplicationCreate",
+    "JobApplicationUpdate",
+    "JobApplicationResponse",
     # Interview
-    'InterviewQuestion',
-    'AnswerEvaluation',
-    'InterviewPack',
-    'InterviewSessionCreate',
-    'InterviewSessionResponse',
-    
+    "InterviewQuestion",
+    "AnswerEvaluation",
+    "InterviewPack",
+    "InterviewSessionCreate",
+    "InterviewSessionResponse",
     # Async Job
-    'JobCreate',
-    'JobUpdate',
-    'JobResponse',
-    
+    "JobCreate",
+    "JobUpdate",
+    "JobResponse",
     # Analytics
-    'ApplicationFunnelData',
-    'SkillGapFrequency',
-    'ApplicationAnalytics',
+    "ApplicationFunnelData",
+    "SkillGapFrequency",
+    "ApplicationAnalytics",
 ]

@@ -1,13 +1,14 @@
 """
 Agent instructions and prompts for the CareerAssist Researcher
 """
+
 from datetime import datetime
 
 
 def get_agent_instructions():
     """Get agent instructions with current date."""
     today = datetime.now().strftime("%B %d, %Y")
-    
+
     return f"""You are a concise career researcher for CareerAssist. Today is {today}.
 
 CRITICAL: Work quickly and efficiently. You have limited time.
@@ -61,13 +62,13 @@ Steps:
 
 4. SAVE FOR RAG (ingest_career_document):
    - Call ingest_career_document after store_research_finding
-   - Topic: "[Topic] Career Research {datetime.now().strftime('%b %d')}"
+   - Topic: "[Topic] Career Research {datetime.now().strftime("%b %d")}"
 
 SPEED IS CRITICAL - work efficiently and don't over-browse.
 """
 
 
-DEFAULT_RESEARCH_PROMPT = """Please research a current, interesting career topic from today's news. 
+DEFAULT_RESEARCH_PROMPT = """Please research a current, interesting career topic from today's news.
 Pick something trending in the job market, hiring trends, or career development.
 Follow all four steps: browse, analyze, store for users (store_research_finding), and store for RAG (ingest_career_document)."""
 

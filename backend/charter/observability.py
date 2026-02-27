@@ -3,11 +3,10 @@ Observability module for LangFuse integration - Charter Agent.
 Receives and continues traces from the Orchestrator for distributed tracing.
 """
 
-import os
-import json
 import logging
+import os
 from contextlib import contextmanager
-from typing import Optional, Dict, Any
+from typing import Any
 
 # Use root logger for Lambda compatibility
 logger = logging.getLogger()
@@ -20,33 +19,33 @@ _langfuse_client = None
 def get_langfuse_client():
     """Get or create the Langfuse client singleton."""
     global _langfuse_client
-    
+
     if _langfuse_client is not None:
         return _langfuse_client
-    
+
     secret_key = os.getenv("LANGFUSE_SECRET_KEY")
     public_key = os.getenv("LANGFUSE_PUBLIC_KEY")
     base_url = os.getenv("LANGFUSE_BASE_URL", "https://cloud.langfuse.com")
-    
+
     if not secret_key or not public_key:
         logger.info("🔍 Observability: Langfuse not configured (missing keys)")
         return None
-    
+
     try:
         from langfuse import Langfuse
-        
+
         _langfuse_client = Langfuse(
             secret_key=secret_key,
             public_key=public_key,
             host=base_url,
             enabled=True,
         )
-        
+
         if _langfuse_client.auth_check():
             logger.info("✅ Observability: Langfuse client initialized")
-            
+
         return _langfuse_client
-        
+
     except ImportError as e:
         logger.error(f"❌ Observability: langfuse package not installed: {e}")
         return None
@@ -68,22 +67,22 @@ def truncate_for_trace(data: Any, max_length: int = 2000) -> Any:
 
 @contextmanager
 def observe(
-    job_id: Optional[str] = None,
+    job_id: str | None = None,
     agent_name: str = "career-charter",
-    user_id: Optional[str] = None,
-    trace_id: Optional[str] = None,
-    parent_span_id: Optional[str] = None,
-    metadata: Optional[Dict[str, Any]] = None,
+    user_id: str | None = None,
+    trace_id: str | None = None,
+    parent_span_id: str | None = None,
+    metadata: dict[str, Any] | None = None,
 ):
     """Context manager for observability with LangFuse."""
     client = get_langfuse_client()
     trace = None
     span = None
-    
+
     if not client:
         yield None
         return
-    
+
     try:
         if trace_id:
             logger.info(f"🔍 Continuing trace: {trace_id[:16]}...")
@@ -107,21 +106,21 @@ def observe(
                 metadata={"agent": agent_name, **(metadata or {})},
                 tags=["career-assist", agent_name],
             )
-        
+
         if user_id:
             trace.update(user_id=user_id)
-        
+
         span = trace.span(
             name=f"{agent_name}-execution",
             parent_observation_id=parent_span_id,
         )
-        
+
         yield {"trace": trace, "span": span, "trace_id": trace.id, "client": client}
-        
+
     except Exception as e:
         logger.error(f"❌ Observability error: {e}")
         yield None
-        
+
     finally:
         if span:
             try:
@@ -153,7 +152,7 @@ def log_span(trace_context, name, input_data=None, output_data=None, metadata=No
         logger.warning(f"Failed to log span: {e}")
 
 
-def extract_trace_context(event: Dict[str, Any]) -> Dict[str, Optional[str]]:
+def extract_trace_context(event: dict[str, Any]) -> dict[str, str | None]:
     """Extract trace context from Lambda event payload."""
     trace_ctx = event.get("_trace_context", {})
     return {

@@ -4,11 +4,12 @@ Migration runner for CareerAssist database
 Supports running either the old Alex schema (001) or the new Career schema (002)
 """
 
+import argparse
 import os
 import sys
-import argparse
-import boto3
 from pathlib import Path
+
+import boto3
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 
@@ -30,13 +31,8 @@ client = boto3.client("rds-data", region_name=region)
 def execute_statement(sql: str) -> dict:
     """Execute a single SQL statement"""
     try:
-        return client.execute_statement(
-            resourceArn=cluster_arn,
-            secretArn=secret_arn,
-            database=database,
-            sql=sql
-        )
-    except ClientError as e:
+        return client.execute_statement(resourceArn=cluster_arn, secretArn=secret_arn, database=database, sql=sql)
+    except ClientError:
         raise
 
 
@@ -44,50 +40,50 @@ def run_migration_file(file_path: Path):
     """Run a migration SQL file by parsing and executing statements"""
     print(f"\n📄 Running migration: {file_path.name}")
     print("-" * 50)
-    
+
     with open(file_path) as f:
         content = f.read()
-    
+
     # Parse SQL file into individual statements
     # This is a simple parser - handles basic SQL files
     statements = []
     current_statement = []
     in_function = False
-    
-    for line in content.split('\n'):
+
+    for line in content.split("\n"):
         stripped = line.strip()
-        
+
         # Skip comments and empty lines (unless in a statement)
-        if not current_statement and (stripped.startswith('--') or not stripped):
+        if not current_statement and (stripped.startswith("--") or not stripped):
             continue
-        
+
         current_statement.append(line)
-        
+
         # Track if we're inside a function/trigger block
-        if 'CREATE OR REPLACE FUNCTION' in line.upper() or 'CREATE FUNCTION' in line.upper():
+        if "CREATE OR REPLACE FUNCTION" in line.upper() or "CREATE FUNCTION" in line.upper():
             in_function = True
-        
+
         # Check for statement terminator
-        if stripped.endswith(';'):
+        if stripped.endswith(";"):
             if in_function:
                 # For functions, we need to wait for the $$ delimiter
-                if '$$;' in stripped or "$$;" in stripped:
+                if "$$;" in stripped or "$$;" in stripped:
                     in_function = False
-                    statements.append('\n'.join(current_statement))
+                    statements.append("\n".join(current_statement))
                     current_statement = []
             else:
-                statements.append('\n'.join(current_statement))
+                statements.append("\n".join(current_statement))
                 current_statement = []
-    
+
     # Execute each statement
     success_count = 0
     error_count = 0
-    
+
     for i, stmt in enumerate(statements, 1):
         stmt = stmt.strip()
         if not stmt:
             continue
-        
+
         # Get statement type for display
         stmt_type = "statement"
         if "CREATE TABLE" in stmt.upper():
@@ -106,48 +102,47 @@ def run_migration_file(file_path: Path):
             stmt_type = "drop table"
         elif "DROP TRIGGER" in stmt.upper():
             stmt_type = "drop trigger"
-        
+
         # First non-empty line for display
         first_line = next((l for l in stmt.split("\n") if l.strip()), "")[:60]
         print(f"\n[{i}/{len(statements)}] Running {stmt_type}...")
         print(f"    {first_line}...")
-        
+
         try:
             execute_statement(stmt)
-            print(f"    ✅ Success")
+            print("    ✅ Success")
             success_count += 1
         except ClientError as e:
             error_msg = e.response["Error"]["Message"]
             if "already exists" in error_msg.lower():
-                print(f"    ⚠️  Already exists (skipping)")
+                print("    ⚠️  Already exists (skipping)")
                 success_count += 1
             elif "does not exist" in error_msg.lower() and "DROP" in stmt.upper():
-                print(f"    ⚠️  Does not exist (skipping)")
+                print("    ⚠️  Does not exist (skipping)")
                 success_count += 1
             else:
                 print(f"    ❌ Error: {error_msg[:150]}")
                 error_count += 1
-    
+
     return success_count, error_count
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Run CareerAssist database migrations')
-    parser.add_argument('--schema', choices=['alex', 'career'], default='career',
-                       help='Which schema to run (alex = 001, career = 002)')
-    parser.add_argument('--all', action='store_true',
-                       help='Run all migrations in order')
-    parser.add_argument('--file', type=str,
-                       help='Run a specific migration file')
+    parser = argparse.ArgumentParser(description="Run CareerAssist database migrations")
+    parser.add_argument(
+        "--schema", choices=["alex", "career"], default="career", help="Which schema to run (alex = 001, career = 002)"
+    )
+    parser.add_argument("--all", action="store_true", help="Run all migrations in order")
+    parser.add_argument("--file", type=str, help="Run a specific migration file")
     args = parser.parse_args()
-    
+
     print("🚀 CareerAssist Database Migration Runner")
     print("=" * 50)
     print(f"📍 Database: {database}")
     print(f"📍 Region: {region}")
-    
+
     migrations_dir = Path(__file__).parent / "migrations"
-    
+
     if args.file:
         # Run specific file
         file_path = Path(args.file)
@@ -157,41 +152,41 @@ def main():
             print(f"❌ Migration file not found: {args.file}")
             sys.exit(1)
         files_to_run = [file_path]
-        
+
     elif args.all:
         # Run all migrations in order
         files_to_run = sorted(migrations_dir.glob("*.sql"))
-        
-    elif args.schema == 'alex':
+
+    elif args.schema == "alex":
         # Run old Alex schema
         files_to_run = [migrations_dir / "001_schema.sql"]
-        
+
     else:
         # Run new Career schema (default)
         files_to_run = [migrations_dir / "002_career_schema.sql"]
-    
+
     total_success = 0
     total_errors = 0
-    
+
     for file_path in files_to_run:
         if not file_path.exists():
             print(f"⚠️  Migration file not found: {file_path}")
             continue
-        
+
         success, errors = run_migration_file(file_path)
         total_success += success
         total_errors += errors
-    
+
     print("\n" + "=" * 50)
     print(f"Migration complete: {total_success} successful, {total_errors} errors")
-    
+
     if total_errors == 0:
         print("\n✅ All migrations completed successfully!")
         print("\n📝 Next steps:")
         print("1. Load seed data: uv run seed_career_data.py")
         print("2. Verify database: uv run verify_database.py")
     else:
-        print(f"\n⚠️  Some statements failed. Check errors above.")
+        print("\n⚠️  Some statements failed. Check errors above.")
         sys.exit(1)
 
 

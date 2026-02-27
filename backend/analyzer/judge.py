@@ -1,16 +1,15 @@
-from agents import Agent, Runner
-from pydantic import BaseModel, Field
-import os
 import logging
+import os
+
+from agents import Agent, Runner
 from agents.extensions.models.litellm_model import LitellmModel
+from pydantic import BaseModel, Field
 
 logger = logging.getLogger()
 
 
 class Evaluation(BaseModel):
-    feedback: str = Field(
-        description="Your feedback on the career analysis and rationale for your score"
-    )
+    feedback: str = Field(description="Your feedback on the career analysis and rationale for your score")
     score: float = Field(
         description="Score from 0 to 100 where 0 represents a poor quality career analysis and 100 represents an outstanding career analysis"
     )
@@ -51,9 +50,7 @@ Evaluate this output and respond with your comments and score.
 
     try:
         logger.info("Evaluating career analysis")
-        agent = Agent(
-            name="Judge Agent", instructions=instructions, model=model, output_type=Evaluation
-        )
+        agent = Agent(name="Judge Agent", instructions=instructions, model=model, output_type=Evaluation)
         result = await Runner.run(agent, input=task, max_turns=5)
         return result.final_output_as(Evaluation)
     except Exception as e:

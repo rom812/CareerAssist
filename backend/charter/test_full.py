@@ -5,10 +5,10 @@ Tests application analytics and chart generation for CareerAssist
 """
 
 import json
-import boto3
 import time
-from dotenv import load_dotenv
 
+import boto3
+from dotenv import load_dotenv
 from src import Database
 from src.schemas import JobCreate
 
@@ -69,7 +69,7 @@ def test_charter_lambda():
                 for i, point in enumerate(data_points[:5]):  # Show first 5
                     name = point.get("name", "N/A")
                     value = point.get("value", 0)
-                    print(f"     {i+1}. {name}: {value}")
+                    print(f"     {i + 1}. {name}: {value}")
 
         else:
             print("\n❌ No charts found in database")

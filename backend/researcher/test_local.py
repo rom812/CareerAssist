@@ -4,11 +4,12 @@ Test the CareerAssist researcher locally before deployment
 """
 
 import asyncio
-from context import get_agent_instructions, DEFAULT_RESEARCH_PROMPT
+
+from agents import Agent, Runner
+from context import DEFAULT_RESEARCH_PROMPT, get_agent_instructions
+from dotenv import load_dotenv
 from mcp_servers import create_playwright_mcp_server
 from tools import ingest_career_document
-from agents import Agent, Runner
-from dotenv import load_dotenv
 
 load_dotenv(override=True)
 

@@ -4,9 +4,8 @@ Package all Lambda functions using Docker for AWS compatibility.
 Runs each agent's package_docker.py script.
 """
 
-import os
-import sys
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -23,9 +22,7 @@ def run_packaging(agent_name):
     print(f"  Running: cd {agent_dir} && uv run package_docker.py")
 
     try:
-        result = subprocess.run(
-            ["uv", "run", "package_docker.py"], cwd=str(agent_dir), capture_output=True, text=True
-        )
+        result = subprocess.run(["uv", "run", "package_docker.py"], cwd=str(agent_dir), capture_output=True, text=True)
 
         if result.returncode == 0:
             # Look for the created zip file
@@ -36,7 +33,7 @@ def run_packaging(agent_name):
                 print(f"  ✅ Created: {zip_file.name} ({size_mb:.1f} MB)")
                 return True
             else:
-                print(f"  ⚠️  Warning: No zip file found after packaging")
+                print("  ⚠️  Warning: No zip file found after packaging")
                 return True
         else:
             print(

@@ -4,13 +4,14 @@ Seed data for Alex Financial Planner
 Loads 20+ popular ETF instruments with allocation data
 """
 
-import os
 import json
+import os
+
 import boto3
 from botocore.exceptions import ClientError
-from src.schemas import InstrumentCreate
-from pydantic import ValidationError
 from dotenv import load_dotenv
+from pydantic import ValidationError
+from src.schemas import InstrumentCreate
 
 # Load environment variables
 load_dotenv(override=True)
@@ -379,7 +380,7 @@ def insert_instrument(instrument_data):
     """
 
     try:
-        response = client.execute_statement(
+        client.execute_statement(
             resourceArn=cluster_arn,
             secretArn=secret_arn,
             database=database,
@@ -452,14 +453,12 @@ def main():
     success_count = 0
 
     for inst in INSTRUMENTS:
-        print(
-            f"  [{success_count + 1}/{len(INSTRUMENTS)}] {inst['symbol']}: {inst['name'][:40]}..."
-        )
+        print(f"  [{success_count + 1}/{len(INSTRUMENTS)}] {inst['symbol']}: {inst['name'][:40]}...")
         if insert_instrument(inst):
-            print(f"    ✅ Success")
+            print("    ✅ Success")
             success_count += 1
         else:
-            print(f"    ❌ Failed")
+            print("    ❌ Failed")
 
     print("\n" + "=" * 50)
     print(f"Seeding complete: {success_count}/{len(INSTRUMENTS)} instruments loaded")

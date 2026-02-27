@@ -3,20 +3,21 @@
 Simple test for Charter agent - Application Analytics
 """
 
-import asyncio
 import json
+
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
-import sys
 import os
+import sys
+
 # Add database directory to path so 'src' module can be found
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../database")))
 
+from lambda_handler import lambda_handler
 from src import Database
 from src.schemas import JobCreate
-from lambda_handler import lambda_handler
 
 
 def test_charter():
@@ -25,9 +26,7 @@ def test_charter():
     # Create a real job in the database
     db = Database()
     job_create = JobCreate(
-        clerk_user_id="test_user_001",
-        job_type="application_analytics",
-        request_payload={"test": True}
+        clerk_user_id="test_user_001", job_type="application_analytics", request_payload={"test": True}
     )
     job_id = db.jobs.create(job_create.model_dump())
     print(f"Created test job: {job_id}")
@@ -43,29 +42,29 @@ def test_charter():
                 "screening": 4,
                 "interview": 3,
                 "offer": 1,
-                "rejected": 4
+                "rejected": 4,
             },
             "applications_by_month": [
                 {"month": "2024-01", "count": 5},
                 {"month": "2024-02", "count": 8},
                 {"month": "2024-03", "count": 7},
-                {"month": "2024-04", "count": 5}
+                {"month": "2024-04", "count": 5},
             ],
             "applications_by_role": [
                 {"role": "Software Engineer", "count": 10, "response_rate": 40},
                 {"role": "Senior Engineer", "count": 8, "response_rate": 50},
                 {"role": "Tech Lead", "count": 4, "response_rate": 25},
-                {"role": "Staff Engineer", "count": 3, "response_rate": 33}
+                {"role": "Staff Engineer", "count": 3, "response_rate": 33},
             ],
             "skill_gaps_frequency": [
                 {"skill": "Kubernetes", "count": 8},
                 {"skill": "System Design", "count": 6},
                 {"skill": "Leadership", "count": 5},
                 {"skill": "AWS", "count": 4},
-                {"skill": "Machine Learning", "count": 3}
+                {"skill": "Machine Learning", "count": 3},
             ],
-            "response_times_days": [3, 5, 7, 7, 10, 14, 14, 21, 28, 30]
-        }
+            "response_times_days": [3, 5, 7, 7, 10, 14, 14, 21, 28, 30],
+        },
     }
 
     print("Testing Charter Agent - Application Analytics...")
@@ -103,9 +102,9 @@ def test_charter():
                     value = point.get("value", 0)
                     color = point.get("color", "N/A")
                     if isinstance(value, (int, float)):
-                        print(f"     {i+1}. {name}: {value} {color}")
+                        print(f"     {i + 1}. {name}: {value} {color}")
                     else:
-                        print(f"     {i+1}. {name}: {value}")
+                        print(f"     {i + 1}. {name}: {value}")
                 if len(data_points) > 5:
                     print(f"     ... and {len(data_points) - 5} more")
 
