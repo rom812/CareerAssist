@@ -18,7 +18,7 @@ logging.getLogger("LiteLLM").setLevel(logging.CRITICAL)
 # Import from our modules
 from context import DEFAULT_RESEARCH_PROMPT, get_agent_instructions
 from mcp_servers import create_playwright_mcp_server
-from tools import ingest_career_document, store_research_finding
+from tools import ingest_career_document, store_discovered_job, store_research_finding
 
 # Load environment
 load_dotenv(override=True)
@@ -63,7 +63,7 @@ async def run_research_agent(topic: str = None) -> str:
                 name="Career Researcher",
                 instructions=get_agent_instructions(),
                 model=model,
-                tools=[store_research_finding, ingest_career_document],
+                tools=[store_research_finding, store_discovered_job, ingest_career_document],
                 mcp_servers=[playwright_mcp],
             )
 

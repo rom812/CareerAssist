@@ -42,7 +42,7 @@ def setup_test_data():
     test_user_id = "test_user_001"
 
     # Check if user exists
-    user = db.users.find_by_clerk_id(test_user_id)
+    user = db.user_profiles.find_by_clerk_id(test_user_id)
     if not user:
         raise ValueError(
             f"Test user {test_user_id} not found. Please run: cd ../database && uv run reset_db.py --with-test-data"
@@ -51,7 +51,7 @@ def setup_test_data():
     # Create test job for CV analysis
     job_create = JobCreate(
         clerk_user_id=test_user_id,
-        job_type="cv_analysis",
+        job_type="full_analysis",
         request_payload={
             "analysis_type": "full",
             "include_gap_analysis": True,

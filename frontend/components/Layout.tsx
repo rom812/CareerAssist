@@ -1,4 +1,4 @@
-import { useUser, UserButton, Protect } from "@clerk/nextjs";
+import { useUser, UserButton, Protect } from "@clerk/clerk-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ReactNode } from "react";

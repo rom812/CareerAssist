@@ -47,7 +47,14 @@ ApplicationStatus = Literal[
 ]
 
 JobType = Literal[
-    "cv_parse", "job_parse", "gap_analysis", "cv_rewrite", "interview_prep", "full_analysis", "market_research"
+    "cv_parse",
+    "job_parse",
+    "gap_analysis",
+    "cv_rewrite",
+    "interview_prep",
+    "full_analysis",
+    "market_research",
+    "application_analytics",
 ]
 
 JobStatus = Literal["pending", "processing", "completed", "failed"]

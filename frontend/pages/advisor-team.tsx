@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth } from '@clerk/clerk-react';
 import Layout from '../components/Layout';
 import { createApiClient, AnalysisJob } from '../lib/api';
 import Head from 'next/head';

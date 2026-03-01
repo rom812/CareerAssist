@@ -1,4 +1,4 @@
-import { useUser, useAuth } from "@clerk/nextjs";
+import { useUser, useAuth } from "@clerk/clerk-react";
 import { useEffect, useState, useCallback } from "react";
 import Layout from "../components/Layout";
 import { Skeleton, SkeletonCard } from "../components/Skeleton";

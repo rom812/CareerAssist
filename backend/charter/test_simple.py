@@ -34,7 +34,7 @@ def test_charter():
     # Sample application tracking data for chart generation
     test_event = {
         "job_id": job_id,
-        "application_data": {
+        "applications_data": {
             "total_applications": 25,
             "applications_by_status": {
                 "saved": 5,

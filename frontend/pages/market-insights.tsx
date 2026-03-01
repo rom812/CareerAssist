@@ -1,6 +1,6 @@
 import Head from "next/head";
 import Layout from "../components/Layout";
-import { useUser, useAuth } from "@clerk/nextjs";
+import { useUser, useAuth } from "@clerk/clerk-react";
 import { useState, useEffect, useCallback } from "react";
 import { createApiClient, ResearchFinding, MarketInsightsSummary } from "../lib/api";
 import { showToast } from "../components/Toast";
