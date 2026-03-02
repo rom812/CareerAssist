@@ -372,9 +372,13 @@ def create_agent(
 
     # Determine task based on job type
     if job_type == "cv_parse":
-        task = f"Parse the provided CV text using invoke_extractor with type='cv'. Job ID: {job_id}"
+        cv_text = input_data.get("cv_text", "")
+        truncated_cv = cv_text[:2000] + ("..." if len(cv_text) > 2000 else "") if cv_text else ""
+        task = f"Parse the provided CV text using invoke_extractor with type='cv'. Job ID: {job_id}\n\nCV TEXT:\n{truncated_cv}"
     elif job_type == "job_parse":
-        task = f"Parse the provided job posting using invoke_extractor with type='job'. Job ID: {job_id}"
+        job_text = input_data.get("job_text", "")
+        truncated_job = job_text[:2000] + ("..." if len(job_text) > 2000 else "") if job_text else ""
+        task = f"Parse the provided job posting using invoke_extractor with type='job'. Job ID: {job_id}\n\nJOB TEXT:\n{truncated_job}"
     elif job_type == "gap_analysis":
         task = f"Run gap analysis comparing CV to job using invoke_analyzer. Job ID: {job_id}"
     elif job_type == "cv_rewrite":

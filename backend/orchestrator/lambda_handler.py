@@ -217,6 +217,18 @@ def lambda_handler(event, context):
 
     except Exception as e:
         logger.error(f"❌ Orchestrator error: {e}", exc_info=True)
+        # Update job status to failed so it doesn't stay stuck in "pending"
+        if job_id:
+            try:
+                db.client.update(
+                    "jobs",
+                    {"status": "failed", "error_message": str(e)[:500]},
+                    "id = :id::uuid",
+                    {"id": job_id},
+                )
+                logger.info(f"Updated job {job_id} status to failed")
+            except Exception as db_error:
+                logger.error(f"Failed to update job {job_id} status: {db_error}")
         return {"statusCode": 500, "body": json.dumps({"success": False, "error": str(e)})}
 
 
