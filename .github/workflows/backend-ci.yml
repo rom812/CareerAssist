@@ -33,17 +33,24 @@ jobs:
         run: uv run ruff format --check .
 
   test:
-    name: Unit Tests (Mocked)
+    name: Unit Tests
     needs: lint
     runs-on: ubuntu-latest
     env:
       MOCK_LAMBDAS: "true"
-      DATABASE_CLUSTER_ARN: "arn:aws:rds:us-east-1:000000000000:cluster:fake"
-      DATABASE_SECRET_ARN: "arn:aws:secretsmanager:us-east-1:000000000000:secret:fake"
-      DATABASE_NAME: "career_assist"
-      AWS_REGION_NAME: "us-east-1"
+      AURORA_CLUSTER_ARN: ${{ secrets.DATABASE_CLUSTER_ARN }}
+      AURORA_SECRET_ARN: ${{ secrets.DATABASE_SECRET_ARN }}
+      AURORA_DATABASE: ${{ secrets.DATABASE_NAME }}
+      DEFAULT_AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_REGION_NAME: ${{ secrets.AWS_REGION }}
     steps:
       - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - uses: astral-sh/setup-uv@v4
         with:
@@ -58,6 +65,6 @@ jobs:
             (cd $agent && uv sync)
           done
 
-      - name: Run mocked tests
+      - name: Run tests
         working-directory: backend
         run: uv run test_simple.py
