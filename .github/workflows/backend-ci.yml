@@ -42,7 +42,7 @@ jobs:
       MOCK_LAMBDAS: "true"
       AURORA_CLUSTER_ARN: ${{ secrets.DATABASE_CLUSTER_ARN }}
       AURORA_SECRET_ARN: ${{ secrets.DATABASE_SECRET_ARN }}
-      AURORA_DATABASE: ${{ secrets.DATABASE_NAME }}
+      AURORA_DATABASE: "career"
       DEFAULT_AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_REGION_NAME: ${{ secrets.AWS_REGION }}
     steps:
