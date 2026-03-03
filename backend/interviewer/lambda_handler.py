@@ -136,9 +136,7 @@ def lambda_handler(event, context):
                 cv_profile = event.get("cv_profile")
                 gap_analysis = event.get("gap_analysis")
 
-                result = asyncio.run(
-                    run_interview_prep(job_id, job_profile, cv_profile, gap_analysis, trace_context)
-                )
+                result = asyncio.run(run_interview_prep(job_id, job_profile, cv_profile, gap_analysis, trace_context))
 
             elif event_type == "answer_evaluation":
                 question = event.get("question")
@@ -171,7 +169,5 @@ if __name__ == "__main__":
         "responsibilities": ["Design and implement scalable microservices"],
     }
 
-    result = lambda_handler(
-        {"type": "interview_prep", "job_id": "test", "job_profile": sample_job}, None
-    )
+    result = lambda_handler({"type": "interview_prep", "job_id": "test", "job_profile": sample_job}, None)
     print(json.dumps(json.loads(result["body"]), indent=2))

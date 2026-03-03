@@ -53,16 +53,41 @@ def store_job(job: dict) -> bool:
     params = [
         {"name": "id", "value": {"stringValue": job_id}},
         {"name": "source", "value": {"stringValue": job.get("source", "indeed")}},
-        {"name": "source_url", "value": {"stringValue": job.get("source_url", "")} if job.get("source_url") else {"isNull": True}},
+        {
+            "name": "source_url",
+            "value": {"stringValue": job.get("source_url", "")} if job.get("source_url") else {"isNull": True},
+        },
         {"name": "source_job_id", "value": {"stringValue": source_job_id}},
         {"name": "company_name", "value": {"stringValue": job.get("company_name", "Unknown")}},
         {"name": "role_title", "value": {"stringValue": job["role_title"]}},
-        {"name": "location", "value": {"stringValue": job.get("location", "")} if job.get("location") else {"isNull": True}},
-        {"name": "remote_policy", "value": {"stringValue": job.get("remote_policy", "")} if job.get("remote_policy") else {"isNull": True}},
-        {"name": "salary_min", "value": {"longValue": job["salary_min"]} if job.get("salary_min") else {"isNull": True}},
-        {"name": "salary_max", "value": {"longValue": job["salary_max"]} if job.get("salary_max") else {"isNull": True}},
-        {"name": "description_text", "value": {"stringValue": job.get("description_text", "")} if job.get("description_text") else {"isNull": True}},
-        {"name": "requirements_text", "value": {"stringValue": job.get("requirements_text", "")} if job.get("requirements_text") else {"isNull": True}},
+        {
+            "name": "location",
+            "value": {"stringValue": job.get("location", "")} if job.get("location") else {"isNull": True},
+        },
+        {
+            "name": "remote_policy",
+            "value": {"stringValue": job.get("remote_policy", "")} if job.get("remote_policy") else {"isNull": True},
+        },
+        {
+            "name": "salary_min",
+            "value": {"longValue": job["salary_min"]} if job.get("salary_min") else {"isNull": True},
+        },
+        {
+            "name": "salary_max",
+            "value": {"longValue": job["salary_max"]} if job.get("salary_max") else {"isNull": True},
+        },
+        {
+            "name": "description_text",
+            "value": {"stringValue": job.get("description_text", "")}
+            if job.get("description_text")
+            else {"isNull": True},
+        },
+        {
+            "name": "requirements_text",
+            "value": {"stringValue": job.get("requirements_text", "")}
+            if job.get("requirements_text")
+            else {"isNull": True},
+        },
     ]
 
     try:
@@ -154,7 +179,11 @@ def scrape_indeed(query: str, location: str = "", num_pages: int = 1) -> list[di
         soup = BeautifulSoup(resp.text, "html.parser")
 
         # Indeed uses various card selectors
-        cards = soup.select("div.job_seen_beacon") or soup.select("div.jobsearch-ResultsList > div") or soup.select("li.css-5lfssm")
+        cards = (
+            soup.select("div.job_seen_beacon")
+            or soup.select("div.jobsearch-ResultsList > div")
+            or soup.select("li.css-5lfssm")
+        )
 
         if not cards:
             # Try finding job data in embedded JSON (Indeed often uses this)
@@ -175,10 +204,16 @@ def scrape_indeed(query: str, location: str = "", num_pages: int = 1) -> list[di
             for script in soup.find_all("script"):
                 if script.string and "mosaic-provider-jobcards" in (script.get("id") or ""):
                     try:
-                        match = re.search(r"window\.mosaic\.providerData\[\"mosaic-provider-jobcards\"\]\s*=\s*({.*?});", script.string, re.DOTALL)
+                        match = re.search(
+                            r"window\.mosaic\.providerData\[\"mosaic-provider-jobcards\"\]\s*=\s*({.*?});",
+                            script.string,
+                            re.DOTALL,
+                        )
                         if match:
                             data = json.loads(match.group(1))
-                            for result in data.get("metaData", {}).get("mosaicProviderJobCardsModel", {}).get("results", []):
+                            for result in (
+                                data.get("metaData", {}).get("mosaicProviderJobCardsModel", {}).get("results", [])
+                            ):
                                 jobs.append(_parse_mosaic_job(result))
                     except (json.JSONDecodeError, AttributeError):
                         continue
@@ -227,7 +262,9 @@ def _parse_jsonld_job(data: dict) -> dict:
         "salary_min": salary_min,
         "salary_max": salary_max,
         "source_url": data.get("url", ""),
-        "source_job_id": data.get("identifier", {}).get("value", "") if isinstance(data.get("identifier"), dict) else "",
+        "source_job_id": data.get("identifier", {}).get("value", "")
+        if isinstance(data.get("identifier"), dict)
+        else "",
         "remote_policy": detect_remote_policy(f"{data.get('title', '')} {loc} {desc[:500]}"),
     }
 
