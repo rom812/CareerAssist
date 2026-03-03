@@ -50,10 +50,13 @@ def test_agent(agent_name, test_file="test_simple.py"):
     else:
         print(f"  ❌ {agent_name}: Test failed")
         if stderr:
-            # Show first error line
             error_lines = [l for l in stderr.split("\n") if l.strip()]
-            if error_lines:
-                print(f"     Error: {error_lines[0][:100]}")
+            for line in error_lines[-10:]:
+                print(f"     {line[:200]}")
+        if stdout:
+            out_lines = [l for l in stdout.split("\n") if l.strip()]
+            for line in out_lines[-5:]:
+                print(f"     {line[:200]}")
 
     return success
 
