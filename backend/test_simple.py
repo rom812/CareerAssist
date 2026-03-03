@@ -10,10 +10,10 @@ import sys
 from pathlib import Path
 
 
-def run_command(cmd, cwd):
+def run_command(cmd, cwd, env=None):
     """Run a command and capture output."""
     print(f"Running in {cwd}: {' '.join(cmd)}")
-    result = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
+    result = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, env=env)
     return result.returncode == 0, result.stdout, result.stderr
 
 
@@ -31,12 +31,14 @@ def test_agent(agent_name, test_file="test_simple.py"):
         print(f"  ⚠️  {agent_name}: No {test_file} found, skipping")
         return True  # Not a failure, just skip
 
-    # Set environment for mocked lambdas
+    # Set environment for mocked lambdas, removing VIRTUAL_ENV to avoid
+    # conflicts when each agent subdirectory has its own pyproject.toml
     env = os.environ.copy()
     env["MOCK_LAMBDAS"] = "true"
+    env.pop("VIRTUAL_ENV", None)
 
     # Run the test with uv
-    success, stdout, stderr = run_command(["uv", "run", test_file], cwd=str(agent_dir))
+    success, stdout, stderr = run_command(["uv", "run", test_file], cwd=str(agent_dir), env=env)
 
     if success:
         print(f"  ✅ {agent_name}: Test passed")
