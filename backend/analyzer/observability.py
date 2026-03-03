@@ -39,7 +39,6 @@ def get_langfuse_client():
             secret_key=secret_key,
             public_key=public_key,
             host=base_url,
-            enabled=True,
         )
 
         # Verify connection

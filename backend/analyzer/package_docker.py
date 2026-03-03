@@ -118,6 +118,9 @@ def package_lambda():
         size_mb = zip_path.stat().st_size / (1024 * 1024)
         print(f"Package created: {zip_path} ({size_mb:.1f} MB)")
 
+        # Clean up build_temp directory
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
         return zip_path
 
 

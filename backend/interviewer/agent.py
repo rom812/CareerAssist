@@ -172,11 +172,42 @@ async def get_interview_questions(wrapper: RunContextWrapper[InterviewerContext]
         return "Questions database unavailable - generate based on job requirements."
 
 
+def _extract_json_from_text(text: str) -> dict[str, Any]:
+    """Extract JSON object from LLM text response."""
+    # Try to find JSON block in markdown code fence
+    import re
+
+    json_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
+    if json_match:
+        return json.loads(json_match.group(1))
+
+    # Try to find raw JSON object
+    start = text.find("{")
+    if start == -1:
+        raise ValueError("No JSON object found in response")
+
+    # Find matching closing brace
+    depth = 0
+    for i in range(start, len(text)):
+        if text[i] == "{":
+            depth += 1
+        elif text[i] == "}":
+            depth -= 1
+            if depth == 0:
+                return json.loads(text[start : i + 1])
+
+    raise ValueError("No complete JSON object found in response")
+
+
 async def generate_interview_pack(
     job_id: str, job_profile: dict[str, Any], cv_profile: dict[str, Any] = None, gap_analysis: dict[str, Any] = None
 ) -> InterviewPack:
     """
     Generate comprehensive interview preparation pack.
+
+    Uses text output instead of structured output_type to avoid Bedrock
+    "Model produced invalid sequence as part of ToolUse" errors with
+    complex nested schemas.
 
     Args:
         job_id: Job posting ID
@@ -197,7 +228,6 @@ async def generate_interview_pack(
         name="Interview Coach",
         instructions=INTERVIEW_PREP_PROMPT,
         model=model,
-        output_type=AgentOutputSchema(InterviewPack, strict_json_schema=False),
     )
 
     task = f"""Generate an interview preparation pack for this role.
@@ -221,13 +251,49 @@ For each question:
 - Specify what the interviewer is testing
 - Provide an answer outline
 - Include potential follow-up questions
-- Mark if it addresses a gap from the analysis"""
+- Mark if it addresses a gap from the analysis
+
+IMPORTANT: Return your response as a single JSON object with this exact structure:
+{{
+  "job_id": "{job_id}",
+  "company": "<company name>",
+  "role": "<role title>",
+  "questions": [
+    {{
+      "id": "q1",
+      "question": "<the question>",
+      "type": "<behavioral|technical|system_design|situational|motivation|mixed>",
+      "topic": "<topic area>",
+      "difficulty": "<easy|medium|hard>",
+      "what_theyre_testing": "<what this assesses>",
+      "sample_answer_outline": "<outline of a good answer>",
+      "follow_up_questions": ["<follow-up 1>", "<follow-up 2>"],
+      "company_specific": false,
+      "gap_related": false
+    }}
+  ],
+  "focus_areas": ["<area 1>", "<area 2>"],
+  "company_specific_tips": ["<tip 1>"],
+  "general_tips": ["<tip 1>", "<tip 2>"]
+}}
+
+Return ONLY the JSON object, no other text."""
 
     with trace("Interview Pack Generation"):
         result = await Runner.run(agent, input=task)
 
-    logger.info(f"Generated interview pack with {len(result.final_output.questions)} questions")
-    return result.final_output
+    # Parse JSON from text response and validate with Pydantic
+    raw_text = result.final_output
+    try:
+        data = _extract_json_from_text(raw_text)
+    except (json.JSONDecodeError, ValueError) as e:
+        logger.error(f"Failed to parse interview pack JSON: {e}")
+        logger.error(f"Raw response (first 500 chars): {raw_text[:500]}")
+        raise ValueError(f"Failed to parse interview pack from LLM response: {e}") from e
+
+    pack = InterviewPack(**data)
+    logger.info(f"Generated interview pack with {len(pack.questions)} questions")
+    return pack
 
 
 async def evaluate_answer(question: InterviewQuestion, answer: str) -> AnswerEvaluation:

@@ -38,7 +38,6 @@ def get_langfuse_client():
             secret_key=secret_key,
             public_key=public_key,
             host=base_url,
-            enabled=True,
         )
 
         if _langfuse_client.auth_check():
