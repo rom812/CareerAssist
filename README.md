@@ -16,6 +16,18 @@
 
 ---
 
+## 🎬 Demo
+
+<div align="center">
+
+<video src="docs/demo.mp4" width="800" controls></video>
+
+</div>
+
+> *Video played at 1.5x speed, no audio.*
+
+---
+
 ## 🎯 Project Overview
 
 **CareerAssist** is a sophisticated AI-powered career platform demonstrating enterprise-grade software engineering practices. This personal project showcases expertise in:
@@ -41,6 +53,8 @@ CareerAssist helps job seekers through AI-powered assistance:
 ---
 
 ## 🏗️ Architecture
+
+![Architecture Diagram](docs/architecture.drawio.png)
 
 ### High-Level System Design
 

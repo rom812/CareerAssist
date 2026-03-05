@@ -305,11 +305,15 @@ node_modules_old_*/
 # WARNING: Ignoring all .md files - this includes documentation!
 # If you need specific .md files (like README.md), add exceptions below
 *.md
+!README.md
 
 # Temporary log and status files
 commit_log.txt
 git_branch.txt
 status*.txt
+
+# Large video files
+*.mov
 
 # Large files that aren't needed
 *.tar.gz
