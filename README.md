@@ -151,9 +151,9 @@ CareerAssist implements a **specialized agent architecture** where each AI agent
 |-----------|-----------|
 | **IaC** | Terraform (modular, independent state) |
 | **Containerization** | Docker + ECR |
-| **CI/CD** | Python deployment scripts |
+| **CI/CD** | GitHub Actions (4 workflows) + Makefile |
 | **Monitoring** | CloudWatch Logs + Dashboards |
-| **Secrets** | AWS Secrets Manager |
+| **Secrets** | AWS Secrets Manager + GitHub Actions Secrets |
 | **Packaging** | uv (Python), npm (Node.js) |
 
 ---
@@ -266,9 +266,10 @@ npm run dev
 
 ### Development Practices
 
+- **CI/CD Pipeline**: GitHub Actions with automated lint, build, test on every PR; manual deploy with concurrency protection
 - **Testing Strategy**:
-  - `test_simple.py` - Local unit tests with mocks
-  - `test_full.py` - Integration tests against deployed AWS resources
+  - `test_simple.py` - Local unit tests with mocks (runs in CI)
+  - `test_full.py` - Integration tests against deployed AWS resources (manual trigger)
 - **Modular Terraform**: Each directory has independent state (no cross-dependencies)
 - **Error Handling**: Dead Letter Queue (DLQ) for failed SQS messages
 - **Observability**: Langfuse distributed tracing across Lambda chain + CloudWatch Logs with 7-day retention
@@ -336,7 +337,36 @@ Each Terraform directory (`2_sagemaker`, `3_ingestion`, etc.) is **fully indepen
 
 **Why**: Allows partial deployments, easier debugging, and isolated state management.
 
-### 4. Hub-and-Spoke Orchestration
+### 4. CI/CD with GitHub Actions
+
+CareerAssist uses **4 GitHub Actions workflows** for automated quality gates and deployment:
+
+| Workflow | Trigger | What It Does |
+|----------|---------|--------------|
+| **Backend CI** | Push/PR to `backend/**` | Ruff lint + format check, then unit tests with mocked Lambdas against live Aurora |
+| **Frontend CI** | Push/PR to `frontend/**` | ESLint + Next.js production build verification |
+| **Deploy** | Manual (`workflow_dispatch`) | Packages Lambda functions via Docker, deploys via Terraform with concurrency locks |
+| **Integration Tests** | Manual (`workflow_dispatch`) | Full end-to-end tests against deployed AWS infrastructure (10min timeout) |
+
+**Pipeline design**:
+- **PR gates**: Backend and Frontend CI run automatically on every pull request, blocking merge on failure
+- **Deployment safety**: Deploy workflow uses `concurrency` groups to prevent parallel deployments and requires manual trigger with environment protection
+- **Two-tier testing**: Unit tests run in CI with `MOCK_LAMBDAS=true`; integration tests run on-demand against real AWS resources
+- **Local parity**: A `Makefile` mirrors the CI pipeline locally (`make ci` runs lint + format-check + test)
+
+```bash
+# Run the full CI pipeline locally
+make ci          # lint + format-check + test
+
+# Individual targets
+make lint        # Ruff (backend) + ESLint (frontend)
+make test        # Unit tests with mocked Lambdas
+make test-full   # Integration tests (requires AWS credentials)
+make package     # Docker-package all Lambda functions
+make deploy      # Deploy via Terraform
+```
+
+### 5. Hub-and-Spoke Orchestration
 
 CareerAssist uses **SQS-triggered orchestration** with a hub-and-spoke agent pattern:
 
@@ -352,7 +382,7 @@ The Orchestrator is the **central hub** — it invokes each agent via synchronou
 - Orchestrator maintains full control and context across the pipeline
 - Prevents Lambda timeout cascade failures
 
-### 5. Playwright MCP for Job Discovery
+### 6. Playwright MCP for Job Discovery
 
 The **Researcher Agent** uses **Model Context Protocol (MCP)** with Playwright for sophisticated web scraping:
 
@@ -458,6 +488,7 @@ This project showcases proficiency in:
 - Responsive UI design
 
 ### DevOps & Best Practices
+- CI/CD pipelines (GitHub Actions with automated gates + manual deploy)
 - Modular architecture
 - Comprehensive testing (unit + integration)
 - Logging and observability

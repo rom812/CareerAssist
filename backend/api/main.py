@@ -17,7 +17,6 @@ from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, Upload
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi_clerk_auth import ClerkConfig, ClerkHTTPBearer, HTTPAuthorizationCredentials
-from mangum import Mangum
 from pydantic import BaseModel, Field, ValidationError
 
 from .pdf_extractor import PDFExtractionError, extract_text_from_pdf, validate_pdf_file
@@ -336,11 +335,18 @@ async def update_user(user_update: UserUpdate, clerk_user_id: str = Depends(get_
         if not update_data:
             return user
 
+        # Allowlist of valid column names to prevent SQL injection via column names
+        ALLOWED_COLUMNS = {"full_name", "linkedin_url", "portfolio_url", "github_url", "target_roles", "target_locations", "years_of_experience"}
         set_clauses = []
         params = {"user_id": user["id"]}
         for key, value in update_data.items():
+            if key not in ALLOWED_COLUMNS:
+                continue
             set_clauses.append(f"{key} = :{key}")
             params[key] = value
+
+        if not set_clauses:
+            return user
 
         sql = f"UPDATE user_profiles SET {', '.join(set_clauses)} WHERE id = :user_id::uuid"
         db.execute(sql, params)
@@ -352,7 +358,7 @@ async def update_user(user_update: UserUpdate, clerk_user_id: str = Depends(get_
         raise
     except Exception as e:
         logger.error(f"Error updating user: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
 # ---------------------------
@@ -383,7 +389,7 @@ async def list_cv_versions(clerk_user_id: str = Depends(get_current_user_id)):
 
     except Exception as e:
         logger.error(f"Error listing CV versions: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
 @app.post("/api/cv-versions")
@@ -427,7 +433,7 @@ async def create_cv_version(cv_data: CVVersionCreate, clerk_user_id: str = Depen
         raise
     except Exception as e:
         logger.error(f"Error creating CV version: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
 @app.get("/api/cv-versions/{cv_id}")
@@ -455,7 +461,7 @@ async def get_cv_version(cv_id: str, clerk_user_id: str = Depends(get_current_us
         raise
     except Exception as e:
         logger.error(f"Error getting CV version: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
 @app.delete("/api/cv-versions/{cv_id}")
@@ -484,7 +490,7 @@ async def delete_cv_version(cv_id: str, clerk_user_id: str = Depends(get_current
         raise
     except Exception as e:
         logger.error(f"Error deleting CV version: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
 @app.post("/api/cv-versions/upload")
@@ -623,7 +629,7 @@ async def list_job_postings(clerk_user_id: str = Depends(get_current_user_id)):
 
     except Exception as e:
         logger.error(f"Error listing job postings: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
 @app.post("/api/job-postings")
@@ -661,7 +667,7 @@ async def create_job_posting(job_data: JobPostingCreate, clerk_user_id: str = De
         raise
     except Exception as e:
         logger.error(f"Error creating job posting: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
 @app.get("/api/job-postings/{job_id}")
@@ -689,7 +695,7 @@ async def get_job_posting(job_id: str, clerk_user_id: str = Depends(get_current_
         raise
     except Exception as e:
         logger.error(f"Error getting job posting: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
 @app.delete("/api/job-postings/{job_id}")
@@ -718,7 +724,7 @@ async def delete_job_posting(job_id: str, clerk_user_id: str = Depends(get_curre
         raise
     except Exception as e:
         logger.error(f"Error deleting job posting: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
 # ---------------------------
@@ -752,7 +758,7 @@ async def list_gap_analyses(clerk_user_id: str = Depends(get_current_user_id)):
 
     except Exception as e:
         logger.error(f"Error listing gap analyses: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
 @app.get("/api/gap-analyses/{analysis_id}")
@@ -785,7 +791,7 @@ async def get_gap_analysis(analysis_id: str, clerk_user_id: str = Depends(get_cu
         raise
     except Exception as e:
         logger.error(f"Error getting gap analysis: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
 # ---------------------------
@@ -872,7 +878,7 @@ async def trigger_analysis(request: AnalysisRequest, clerk_user_id: str = Depend
         raise
     except Exception as e:
         logger.error(f"Error triggering analysis: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
 @app.get("/api/jobs")
@@ -892,7 +898,7 @@ async def list_jobs(clerk_user_id: str = Depends(get_current_user_id)):
 
     except Exception as e:
         logger.error(f"Error listing jobs: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
 @app.get("/api/jobs/{job_id}")
@@ -915,7 +921,7 @@ async def get_job_status(job_id: str, clerk_user_id: str = Depends(get_current_u
         raise
     except Exception as e:
         logger.error(f"Error getting job status: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
 # ---------------------------
@@ -946,7 +952,7 @@ async def list_interview_sessions(clerk_user_id: str = Depends(get_current_user_
 
     except Exception as e:
         logger.error(f"Error listing interview sessions: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
 @app.get("/api/interview-sessions/{session_id}")
@@ -975,7 +981,7 @@ async def get_interview_session(session_id: str, clerk_user_id: str = Depends(ge
         raise
     except Exception as e:
         logger.error(f"Error getting interview session: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
 # ---------------------------
@@ -1037,7 +1043,7 @@ async def get_dashboard_stats(clerk_user_id: str = Depends(get_current_user_id))
 
     except Exception as e:
         logger.error(f"Error getting dashboard stats: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
 # ---------------------------
@@ -1122,7 +1128,7 @@ async def list_research_findings(
             logger.warning("research_findings table does not exist - run migration 004")
             return {"findings": [], "total": 0, "limit": limit, "offset": offset}
         logger.error(f"Error listing research findings: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
 @app.get("/api/trending-roles")
@@ -1153,7 +1159,7 @@ async def get_trending_roles(limit: int = 10):
             logger.warning("research_findings table does not exist - run migration 004")
             return {"roles": [], "count": 0}
         logger.error(f"Error getting trending roles: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
 @app.get("/api/research-findings/{finding_id}")
@@ -1186,7 +1192,7 @@ async def get_research_finding(finding_id: str):
             logger.warning("research_findings table does not exist - run migration 004")
             raise HTTPException(status_code=404, detail="Research findings not available")
         logger.error(f"Error getting research finding: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
 @app.get("/api/market-insights-summary")
@@ -1238,7 +1244,7 @@ async def get_market_insights_summary():
             logger.warning("research_findings table does not exist - run migration 004")
             return {"total_findings": 0, "by_category": {}, "featured": [], "latest": []}
         logger.error(f"Error getting market insights summary: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
 # ---------------------------
@@ -1318,7 +1324,7 @@ async def list_discovered_jobs(
 
     except Exception as e:
         logger.error(f"Error listing discovered jobs: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
 @app.get("/api/discovered-jobs/{job_id}")
@@ -1349,7 +1355,7 @@ async def get_discovered_job(job_id: str):
         raise
     except Exception as e:
         logger.error(f"Error getting discovered job: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
 @app.post("/api/discovered-jobs/{job_id}/save")
@@ -1433,7 +1439,7 @@ async def save_discovered_job(job_id: str, clerk_user_id: str = Depends(get_curr
         raise
     except Exception as e:
         logger.error(f"Error saving discovered job: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
 @app.get("/api/discovered-jobs-summary")
@@ -1483,11 +1489,61 @@ async def get_discovered_jobs_summary():
 
     except Exception as e:
         logger.error(f"Error getting discovered jobs summary: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again later.")
 
 
-# Lambda handler
-handler = Mangum(app, lifespan="off")
+# ---------------------------
+# Researcher Trigger Endpoint
+# ---------------------------
+
+
+class TriggerResearchRequest(BaseModel):
+    mode: str = "market_research"  # "market_research" or "job_discovery"
+    topic: str = ""
+
+
+@app.post("/api/trigger-research")
+async def trigger_research(req: TriggerResearchRequest, clerk_user_id: str = Depends(get_current_user_id)):
+    """
+    Trigger the researcher service to run market research or job discovery.
+    Uses async Lambda invocation to bypass API Gateway's 30s timeout limit.
+    """
+    import boto3
+    import json as json_module
+
+    researcher_url = os.getenv("RESEARCHER_SERVICE_URL", "")
+    if not researcher_url:
+        raise HTTPException(status_code=503, detail="Researcher service not configured")
+
+    if req.mode not in ("market_research", "job_discovery"):
+        raise HTTPException(status_code=400, detail="Invalid mode. Use 'market_research' or 'job_discovery'")
+
+    topic = req.topic
+    if req.mode == "job_discovery" and not topic:
+        topic = "Search for software engineer, data scientist, and ML engineer jobs"
+
+    try:
+        # Invoke this same Lambda asynchronously with a special payload.
+        # The async invocation bypasses API Gateway's 30s timeout and gives
+        # the researcher call up to 280s (Lambda's 300s timeout minus buffer).
+        lambda_client = boto3.client("lambda")
+        lambda_client.invoke(
+            FunctionName="career-api",
+            InvocationType="Event",  # Async — returns immediately
+            Payload=json_module.dumps({
+                "_async_research": True,
+                "researcher_url": researcher_url,
+                "topic": topic,
+            }),
+        )
+
+        logger.info(f"Research triggered async: mode={req.mode}, user={clerk_user_id}")
+        return {"success": True, "mode": req.mode, "message": "Research triggered — results will appear shortly"}
+
+    except Exception as e:
+        logger.error(f"Error triggering research: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to trigger research: {str(e)}")
+
 
 if __name__ == "__main__":
     import uvicorn

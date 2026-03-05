@@ -118,9 +118,11 @@ async def run_orchestrator(
             if job_type == "full_analysis":
                 await ensure_interviewer_called(job_id, context, trace_context)
 
-            # Update job status to completed
-            db.client.update("jobs", {"status": "completed"}, "id = :id::uuid", {"id": job_id})
-            log_db_operation(trace_context, "update", "jobs", True, affected_rows=1)
+            # Update job status to completed (conditional: don't overwrite cancelled)
+            rows = db.client.update("jobs", {"status": "completed"}, "id = :id::uuid AND status = 'processing'", {"id": job_id})
+            log_db_operation(trace_context, "update", "jobs", True, affected_rows=rows)
+            if rows == 0:
+                logger.info(f"⏭️ Job {job_id} was not updated to completed (likely cancelled)")
 
             logger.info(f"✅ Orchestrator: Job {job_id} completed successfully")
             logger.info(f"📋 Final output: {str(result.final_output)[:200]}...")
@@ -128,7 +130,7 @@ async def run_orchestrator(
     except Exception as e:
         logger.error(f"❌ Orchestrator: Error in orchestration: {e}", exc_info=True)
         try:
-            db.client.update("jobs", {"status": "failed", "error_message": str(e)}, "id = :id::uuid", {"id": job_id})
+            db.client.update("jobs", {"status": "failed", "error_message": str(e)}, "id = :id::uuid AND status != 'cancelled'", {"id": job_id})
             log_db_operation(trace_context, "update", "jobs", True, affected_rows=1)
         except Exception as db_error:
             logger.error(f"Failed to update job status: {db_error}")
@@ -179,6 +181,11 @@ def lambda_handler(event, context):
                 logger.error(f"Job {job_id} not found in database")
                 return {"statusCode": 404, "body": json.dumps({"error": f"Job {job_id} not found"})}
 
+            # Check if job was cancelled before we start processing
+            if job.get("status") == "cancelled":
+                logger.info(f"⏭️ Job {job_id} was cancelled, skipping processing")
+                return {"statusCode": 200, "body": json.dumps({"skipped": True, "reason": "Job was cancelled"})}
+
             job_type = job.get("job_type", "full_analysis")
             user_id = user_id or job.get("clerk_user_id")
             input_data_raw = job.get("input_data") or {}
@@ -223,13 +230,13 @@ def lambda_handler(event, context):
                 db.client.update(
                     "jobs",
                     {"status": "failed", "error_message": str(e)[:500]},
-                    "id = :id::uuid",
+                    "id = :id::uuid AND status != 'cancelled'",
                     {"id": job_id},
                 )
                 logger.info(f"Updated job {job_id} status to failed")
             except Exception as db_error:
                 logger.error(f"Failed to update job {job_id} status: {db_error}")
-        return {"statusCode": 500, "body": json.dumps({"success": False, "error": str(e)})}
+        return {"statusCode": 500, "body": json.dumps({"success": False, "error": "Internal processing error"})}
 
 
 if __name__ == "__main__":

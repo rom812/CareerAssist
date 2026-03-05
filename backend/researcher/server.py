@@ -9,7 +9,8 @@ from datetime import UTC, datetime
 from agents import Agent, Runner, trace
 from agents.extensions.models.litellm_model import LitellmModel
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Security
+from fastapi.security import APIKeyHeader
 from pydantic import BaseModel
 
 # Suppress LiteLLM warnings about optional dependencies
@@ -23,7 +24,23 @@ from tools import ingest_career_document, store_discovered_job, store_research_f
 # Load environment
 load_dotenv(override=True)
 
+logger = logging.getLogger(__name__)
+
 app = FastAPI(title="Career Researcher Service")
+
+# API Key authentication
+RESEARCHER_API_KEY = os.getenv("RESEARCHER_API_KEY", "")
+api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+
+
+async def verify_api_key(api_key: str = Security(api_key_header)) -> str:
+    """Verify the API key for protected endpoints."""
+    if not RESEARCHER_API_KEY:
+        # If no key is configured, allow access (local dev mode)
+        return "dev"
+    if not api_key or api_key != RESEARCHER_API_KEY:
+        raise HTTPException(status_code=403, detail="Invalid or missing API key")
+    return api_key
 
 
 # Request model
@@ -83,7 +100,7 @@ async def root():
 
 
 @app.post("/research")
-async def research(request: ResearchRequest) -> str:
+async def research(request: ResearchRequest, _: str = Depends(verify_api_key)) -> str:
     """
     Generate career research and advice.
 
@@ -94,27 +111,57 @@ async def research(request: ResearchRequest) -> str:
 
     If no topic is provided, the agent will pick a trending career topic.
     """
-    try:
-        response = await run_research_agent(request.topic)
-        return response
-    except Exception as e:
-        print(f"Error in research endpoint: {e}")
-        import traceback
+    import asyncio
 
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+    max_retries = 3
+    last_error = None
+    for attempt in range(max_retries):
+        try:
+            response = await run_research_agent(request.topic)
+            return response
+        except Exception as e:
+            last_error = e
+            error_msg = str(e)
+            logger.error(f"Error in research endpoint (attempt {attempt + 1}/{max_retries}): {error_msg}")
+            # Retry on Bedrock ToolUse errors (intermittent model issue)
+            if "ToolUse" in error_msg or "invalid sequence" in error_msg:
+                if attempt < max_retries - 1:
+                    wait_time = 2 ** attempt
+                    logger.info(f"Retrying in {wait_time}s...")
+                    await asyncio.sleep(wait_time)
+                    continue
+            # Non-retryable error
+            logger.error(f"Research failed: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail="Research request failed. Please try again later.")
+
+    # All retries exhausted
+    logger.error(f"Research failed after {max_retries} retries: {last_error}", exc_info=True)
+    raise HTTPException(status_code=500, detail="Research request failed after multiple retries.")
 
 
 @app.get("/research/auto")
-async def research_auto():
+async def research_auto(_: str = Depends(verify_api_key)):
     """
     Automated research endpoint for scheduled runs.
     Picks a trending topic automatically and generates research.
     Used by EventBridge Scheduler for periodic research updates.
     """
+    import asyncio
+
     try:
-        # Always use agent's choice for automated runs
-        response = await run_research_agent(topic=None)
+        # Always use agent's choice for automated runs, with retry
+        response = None
+        for attempt in range(3):
+            try:
+                response = await run_research_agent(topic=None)
+                break
+            except Exception as e:
+                if "ToolUse" in str(e) and attempt < 2:
+                    await asyncio.sleep(2 ** attempt)
+                    continue
+                raise
+        if response is None:
+            raise Exception("All retries exhausted")
         return {
             "status": "success",
             "timestamp": datetime.now(UTC).isoformat(),
@@ -122,97 +169,18 @@ async def research_auto():
             "preview": response[:200] + "..." if len(response) > 200 else response,
         }
     except Exception as e:
-        print(f"Error in automated research: {e}")
-        return {"status": "error", "timestamp": datetime.now(UTC).isoformat(), "error": str(e)}
+        logger.error(f"Error in automated research: {e}", exc_info=True)
+        return {"status": "error", "timestamp": datetime.now(UTC).isoformat(), "error": "Research failed"}
 
 
 @app.get("/health")
 async def health():
-    """Detailed health check."""
-    # Debug container detection
-    container_indicators = {
-        "dockerenv": os.path.exists("/.dockerenv"),
-        "containerenv": os.path.exists("/run/.containerenv"),
-        "aws_execution_env": os.environ.get("AWS_EXECUTION_ENV", ""),
-        "ecs_container_metadata": os.environ.get("ECS_CONTAINER_METADATA_URI", ""),
-        "kubernetes_service": os.environ.get("KUBERNETES_SERVICE_HOST", ""),
-    }
-
+    """Health check endpoint."""
     return {
         "service": "Career Researcher",
         "status": "healthy",
-        "career_api_configured": bool(os.getenv("CAREER_API_ENDPOINT") and os.getenv("CAREER_API_KEY")),
         "timestamp": datetime.now(UTC).isoformat(),
-        "debug_container": container_indicators,
-        "aws_region": os.environ.get("AWS_DEFAULT_REGION", "not set"),
-        "bedrock_model": "bedrock/amazon.nova-pro-v1:0",
     }
-
-
-@app.get("/test-bedrock")
-async def test_bedrock():
-    """Test Bedrock connection directly."""
-    try:
-        import boto3
-
-        # Set ALL region environment variables
-        os.environ["AWS_REGION_NAME"] = "us-east-1"
-        os.environ["AWS_REGION"] = "us-east-1"
-        os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
-
-        # Debug: Check what region boto3 is actually using
-        session = boto3.Session()
-        actual_region = session.region_name
-
-        # Try to create Bedrock client explicitly in us-west-2
-        client = boto3.client("bedrock-runtime", region_name="us-west-2")
-
-        # Debug: Try to list models to verify connection
-        try:
-            bedrock_client = boto3.client("bedrock", region_name="us-west-2")
-            models = bedrock_client.list_foundation_models()
-            openai_models = [m["modelId"] for m in models["modelSummaries"] if "openai" in m["modelId"].lower()]
-        except Exception as list_error:
-            openai_models = f"Error listing: {str(list_error)}"
-
-        # Try basic model invocation with Nova Pro
-        model = LitellmModel(model="bedrock/amazon.nova-pro-v1:0")
-
-        agent = Agent(
-            name="Test Agent",
-            instructions="You are a helpful assistant. Be very brief.",
-            model=model,
-        )
-
-        result = await Runner.run(agent, input="Say hello in 5 words or less", max_turns=1)
-
-        return {
-            "status": "success",
-            "model": str(model.model),  # Use actual model from LitellmModel
-            "region": actual_region,
-            "response": result.final_output,
-            "debug": {
-                "boto3_session_region": actual_region,
-                "available_openai_models": openai_models,
-            },
-        }
-    except Exception as e:
-        import traceback
-
-        return {
-            "status": "error",
-            "error": str(e),
-            "type": type(e).__name__,
-            "traceback": traceback.format_exc(),
-            "debug": {
-                "boto3_session_region": session.region_name if "session" in locals() else "unknown",
-                "env_vars": {
-                    "AWS_REGION_NAME": os.environ.get("AWS_REGION_NAME"),
-                    "AWS_REGION": os.environ.get("AWS_REGION"),
-                    "AWS_DEFAULT_REGION": os.environ.get("AWS_DEFAULT_REGION"),
-                },
-            },
-        }
 
 
 if __name__ == "__main__":
