@@ -20,7 +20,7 @@
 
 <div align="center">
 
-<video src="docs/demo.mp4" width="800" controls></video>
+https://github.com/user-attachments/assets/4f2f1e93-996a-4e11-a050-389a532a7eeb
 
 </div>
 
