@@ -2,7 +2,6 @@
 
 import json
 import logging
-import os
 import urllib.error
 import urllib.request
 

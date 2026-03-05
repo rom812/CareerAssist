@@ -1508,8 +1508,9 @@ async def trigger_research(req: TriggerResearchRequest, clerk_user_id: str = Dep
     Trigger the researcher service to run market research or job discovery.
     Uses async Lambda invocation to bypass API Gateway's 30s timeout limit.
     """
-    import boto3
     import json as json_module
+
+    import boto3
 
     researcher_url = os.getenv("RESEARCHER_SERVICE_URL", "")
     if not researcher_url:
