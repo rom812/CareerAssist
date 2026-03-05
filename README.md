@@ -54,71 +54,13 @@ CareerAssist helps job seekers through AI-powered assistance:
 
 ## 🏗️ Architecture
 
-![Architecture Diagram](docs/architecture.drawio.png)
-
 ### High-Level System Design
 
-```mermaid
-graph TB
-    subgraph Frontend["🖥️ Frontend Layer"]
-        CloudFront[CloudFront CDN]
-        NextJS[Next.js App<br/>TypeScript + React]
-        Clerk[Clerk Auth<br/>JWT Authentication]
-    end
+<div align="center">
 
-    subgraph API["🔌 API Layer"]
-        APIGW[API Gateway HTTP API]
-        FastAPI[FastAPI Backend<br/>Python 3.12]
-    end
+![CareerAssist AWS Architecture](docs/architecture_update.drawio.png)
 
-    subgraph Queue["📬 Message Queue"]
-        SQS[SQS Queue<br/>Async Job Processing]
-    end
-
-    subgraph Agents["🤖 Multi-Agent System"]
-        Orchestrator[Orchestrator Agent<br/>Request Router]
-        Extractor[Extractor Agent<br/>CV & Job Parser]
-        Analyzer[Analyzer Agent<br/>Gap Analysis]
-        Interviewer[Interviewer Agent<br/>Interview Prep]
-        Charter[Charter Agent<br/>Analytics]
-        Researcher[Researcher Agent<br/>Web Scraper - Playwright MCP<br/>App Runner]
-    end
-
-    subgraph AI["🧠 AI Services"]
-        Bedrock[AWS Bedrock<br/>Nova Pro LLM]
-        SageMaker[SageMaker Serverless<br/>Embedding Model]
-    end
-
-    subgraph Data["💾 Data Layer"]
-        Aurora[(Aurora Serverless v2<br/>PostgreSQL 15)]
-        S3Vectors[S3 Vectors<br/>RAG Knowledge Base]
-    end
-
-    CloudFront --> NextJS
-    NextJS --> APIGW
-    APIGW --> FastAPI
-    FastAPI --> SQS
-    SQS --> Orchestrator
-
-    Orchestrator --> Extractor
-    Orchestrator --> Analyzer
-    Orchestrator --> Interviewer
-    Orchestrator --> Charter
-    Orchestrator --> Researcher
-
-    Extractor --> Bedrock
-    Analyzer --> Bedrock
-    Analyzer --> SageMaker
-    Analyzer --> S3Vectors
-    Interviewer --> Bedrock
-    Charter --> Aurora
-    Researcher --> Bedrock
-
-    Extractor --> Aurora
-    Analyzer --> Aurora
-    Interviewer --> Aurora
-    Researcher --> Aurora
-```
+</div>
 
 ### Multi-Agent Orchestration
 
@@ -126,12 +68,12 @@ CareerAssist implements a **specialized agent architecture** where each AI agent
 
 | Agent | Purpose | Technology | Key Features |
 |-------|---------|------------|--------------|
-| **Orchestrator** | Routes requests to specialist agents | OpenAI Agents SDK + Bedrock | Lambda invocation, error handling, result aggregation |
-| **Extractor** | Parses CVs and job postings into structured data | Structured Outputs | NER extraction, schema validation |
-| **Analyzer** | Gap analysis and CV rewriting | RAG + Vector Search | Fit scoring (0-100), ATS optimization, template matching |
-| **Interviewer** | Interview question generation and evaluation | Knowledge Base RAG | Behavioral/Technical/Situational questions, STAR method |
-| **Charter** | Application analytics and visualizations | SQL + Bedrock | Success rate tracking, funnel analysis |
-| **Researcher** | Scrapes web for open job postings | Playwright MCP + App Runner | Automated job discovery, multi-site scraping, headless browser automation |
+| **Orchestrator** | Routes requests to specialist agents | Tools (Lambda invocation) | Nova Pro, error handling, fallback logic |
+| **Extractor** | Parses CVs and job postings into structured data | Structured Outputs (Pydantic) | Nova Pro, CVProfile/JobProfile schemas |
+| **Analyzer** | Gap analysis and CV rewriting | Tools + RAG (S3 Vectors) | Nova Pro, fit scoring (0-100), ATS keywords |
+| **Interviewer** | Interview question generation and evaluation | Tools + Text parsing | Nova Pro, STAR method, difficulty levels |
+| **Charter** | Application analytics and visualizations | Text analysis | Nova Pro, funnel metrics, success rates |
+| **Researcher** | Scrapes web for open job postings | Playwright MCP + App Runner | Nova Pro, headless browser, multi-site scraping |
 
 **Design Pattern**: Event-driven orchestration with async processing via SQS queues
 
@@ -189,7 +131,7 @@ CareerAssist implements a **specialized agent architecture** where each AI agent
 | **Web Scraping** | Playwright MCP | Browser automation for job discovery |
 | **Database** | Aurora Serverless v2 (PostgreSQL 15) | Transactional data storage |
 | **Vector Store** | Custom S3 Vectors | Cost-effective RAG knowledge base |
-| **LLM** | AWS Bedrock (Nova Pro) | AI agent intelligence |
+| **LLM** | AWS Bedrock (Amazon Nova Pro) | AI agent intelligence |
 | **Embeddings** | SageMaker Serverless (HuggingFace) | Semantic search vectors |
 | **Orchestration** | SQS + EventBridge | Async job queue + scheduling |
 | **API Gateway** | API Gateway HTTP API | RESTful endpoint management |
@@ -198,8 +140,8 @@ CareerAssist implements a **specialized agent architecture** where each AI agent
 
 | Component | Technology |
 |-----------|-----------|
-| **Framework** | Next.js 14 (TypeScript) |
-| **UI Library** | React 18 |
+| **Framework** | Next.js 15 (TypeScript) |
+| **UI Library** | React 19 |
 | **Authentication** | Clerk (JWT) |
 | **Hosting** | CloudFront + S3 |
 
@@ -268,7 +210,7 @@ CareerAssist/
 
 - **AWS Account** with appropriate permissions
 - **Docker Desktop** (required for Lambda packaging)
-- **Node.js 18+** and **Python 3.11+**
+- **Node.js 18+** and **Python 3.12+**
 - **uv** (Python package manager)
 - **Terraform 1.5+**
 
@@ -329,7 +271,7 @@ npm run dev
   - `test_full.py` - Integration tests against deployed AWS resources
 - **Modular Terraform**: Each directory has independent state (no cross-dependencies)
 - **Error Handling**: Dead Letter Queue (DLQ) for failed SQS messages
-- **Observability**: CloudWatch Logs with 7-day retention, custom dashboards
+- **Observability**: Langfuse distributed tracing across Lambda chain + CloudWatch Logs with 7-day retention
 
 ---
 
@@ -394,38 +336,27 @@ Each Terraform directory (`2_sagemaker`, `3_ingestion`, etc.) is **fully indepen
 
 **Why**: Allows partial deployments, easier debugging, and isolated state management.
 
-### 4. Event-Driven Orchestration
+### 4. Hub-and-Spoke Orchestration
 
-Instead of synchronous Lambda chains, CareerAssist uses **SQS-based async orchestration**:
+CareerAssist uses **SQS-triggered orchestration** with a hub-and-spoke agent pattern:
 
 ```
-User Request → API Gateway → FastAPI → SQS Queue → Orchestrator → [Parallel Agents] → Database
+User Request → API Gateway → FastAPI → SQS Queue → Orchestrator ⇄ Specialist Agents → Database
 ```
+
+The Orchestrator is the **central hub** — it invokes each agent via synchronous Lambda calls, receives results back, stores them in a shared context, and passes accumulated data to the next agent. Agents never communicate with each other directly.
 
 **Benefits**:
 - Decouples frontend from long-running processes
 - Enables retry logic with Dead Letter Queues
-- Supports batch processing
+- Orchestrator maintains full control and context across the pipeline
 - Prevents Lambda timeout cascade failures
 
 ### 5. Playwright MCP for Job Discovery
 
 The **Researcher Agent** uses **Model Context Protocol (MCP)** with Playwright for sophisticated web scraping:
 
-```python
-# Playwright MCP integration for browser automation
-from mcp_playwright import browser_navigate, browser_fill_form, browser_click
-
-# Navigate to job board
-await browser_navigate(url="https://careers.company.com/jobs")
-
-# Search for roles matching user criteria
-await browser_fill_form(selector="#search", value="Software Engineer")
-await browser_click(selector="#search-button")
-
-# Extract structured job data with AI parsing
-jobs = await extract_job_listings(page_content)
-```
+The Researcher agent runs as an **App Runner** service (not Lambda) to handle long-running browser sessions. It uses the Playwright MCP server (`npx @playwright/mcp@latest`) in headless mode with the OpenAI Agents SDK, allowing the LLM to autonomously navigate job boards, fill search forms, and extract structured job data into PostgreSQL.
 
 **Key Capabilities**:
 - **Headless Browser Automation**: Renders JavaScript-heavy job boards that APIs can't access
@@ -521,8 +452,8 @@ This project showcases proficiency in:
 - Custom vector storage implementation
 
 ### Frontend Development
-- Next.js 14 (App Router, TypeScript)
-- React 18 (hooks, component architecture)
+- Next.js 15 (Pages Router, TypeScript)
+- React 19 (hooks, component architecture)
 - JWT authentication (Clerk)
 - Responsive UI design
 
@@ -545,6 +476,6 @@ This project was built as a technical showcase demonstrating full-stack AI appli
 
 **Built with** ☁️ AWS Serverless • 🤖 AI Agents • 🐍 Python • ⚡ TypeScript
 
-*Last Updated: January 2026*
+*Last Updated: March 2026*
 
 </div>
