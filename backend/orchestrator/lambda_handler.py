@@ -119,7 +119,9 @@ async def run_orchestrator(
                 await ensure_interviewer_called(job_id, context, trace_context)
 
             # Update job status to completed (conditional: don't overwrite cancelled)
-            rows = db.client.update("jobs", {"status": "completed"}, "id = :id::uuid AND status = 'processing'", {"id": job_id})
+            rows = db.client.update(
+                "jobs", {"status": "completed"}, "id = :id::uuid AND status = 'processing'", {"id": job_id}
+            )
             log_db_operation(trace_context, "update", "jobs", True, affected_rows=rows)
             if rows == 0:
                 logger.info(f"⏭️ Job {job_id} was not updated to completed (likely cancelled)")
@@ -130,7 +132,12 @@ async def run_orchestrator(
     except Exception as e:
         logger.error(f"❌ Orchestrator: Error in orchestration: {e}", exc_info=True)
         try:
-            db.client.update("jobs", {"status": "failed", "error_message": str(e)}, "id = :id::uuid AND status != 'cancelled'", {"id": job_id})
+            db.client.update(
+                "jobs",
+                {"status": "failed", "error_message": str(e)},
+                "id = :id::uuid AND status != 'cancelled'",
+                {"id": job_id},
+            )
             log_db_operation(trace_context, "update", "jobs", True, affected_rows=1)
         except Exception as db_error:
             logger.error(f"Failed to update job status: {db_error}")

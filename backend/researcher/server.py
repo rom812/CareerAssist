@@ -126,7 +126,7 @@ async def research(request: ResearchRequest, _: str = Depends(verify_api_key)) -
             # Retry on Bedrock ToolUse errors (intermittent model issue)
             if "ToolUse" in error_msg or "invalid sequence" in error_msg:
                 if attempt < max_retries - 1:
-                    wait_time = 2 ** attempt
+                    wait_time = 2**attempt
                     logger.info(f"Retrying in {wait_time}s...")
                     await asyncio.sleep(wait_time)
                     continue
@@ -157,7 +157,7 @@ async def research_auto(_: str = Depends(verify_api_key)):
                 break
             except Exception as e:
                 if "ToolUse" in str(e) and attempt < 2:
-                    await asyncio.sleep(2 ** attempt)
+                    await asyncio.sleep(2**attempt)
                     continue
                 raise
         if response is None:

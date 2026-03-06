@@ -336,7 +336,15 @@ async def update_user(user_update: UserUpdate, clerk_user_id: str = Depends(get_
             return user
 
         # Allowlist of valid column names to prevent SQL injection via column names
-        ALLOWED_COLUMNS = {"full_name", "linkedin_url", "portfolio_url", "github_url", "target_roles", "target_locations", "years_of_experience"}
+        ALLOWED_COLUMNS = {
+            "full_name",
+            "linkedin_url",
+            "portfolio_url",
+            "github_url",
+            "target_roles",
+            "target_locations",
+            "years_of_experience",
+        }
         set_clauses = []
         params = {"user_id": user["id"]}
         for key, value in update_data.items():
@@ -1531,11 +1539,13 @@ async def trigger_research(req: TriggerResearchRequest, clerk_user_id: str = Dep
         lambda_client.invoke(
             FunctionName="career-api",
             InvocationType="Event",  # Async — returns immediately
-            Payload=json_module.dumps({
-                "_async_research": True,
-                "researcher_url": researcher_url,
-                "topic": topic,
-            }),
+            Payload=json_module.dumps(
+                {
+                    "_async_research": True,
+                    "researcher_url": researcher_url,
+                    "topic": topic,
+                }
+            ),
         )
 
         logger.info(f"Research triggered async: mode={req.mode}, user={clerk_user_id}")

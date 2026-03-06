@@ -47,9 +47,7 @@ def _handle_async_research(event):
     for attempt in range(max_retries):
         try:
             data = json.dumps({"topic": topic or None}).encode("utf-8")
-            req = urllib.request.Request(
-                url, data=data, headers={"Content-Type": "application/json"}, method="POST"
-            )
+            req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"}, method="POST")
 
             logger.info(f"Async research (attempt {attempt + 1}): calling {url} with topic={topic!r}")
             with urllib.request.urlopen(req, timeout=280) as response:
